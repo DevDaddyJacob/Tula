@@ -28,5 +28,12 @@
 			"gruntfuggly.todo-tree",
 			"vscode-icons-team.vscode-icons"
 		]
+	},
+	"settings": {
+		"java.project.sourcePaths": [
+			"tula-java\\src"
+		],
+		"java.project.referencedLibraries": [],
+		"java.project.outputPath": "tula-java\\bin"
 	}
 }

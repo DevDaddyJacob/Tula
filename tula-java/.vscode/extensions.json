@@ -8,6 +8,7 @@
         "pkief.material-icon-theme",
         "christian-kohler.path-intellisense",
         "gruntfuggly.todo-tree",
-        "vscode-icons-team.vscode-icons"
+        "vscode-icons-team.vscode-icons",
+        "vscjava.vscode-java-pack"
     ]
 }
