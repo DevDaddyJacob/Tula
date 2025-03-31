@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "eamodio.gitlens",
+        "dracula-theme.theme-dracula",
+        "dzhavat.bracket-pair-toggler",
+        "leonardssh.vscord",
+        "shd101wyy.markdown-preview-enhanced",
+        "pkief.material-icon-theme",
+        "christian-kohler.path-intellisense",
+        "gruntfuggly.todo-tree",
+        "vscode-icons-team.vscode-icons"
+    ]
+}
