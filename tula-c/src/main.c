@@ -7,17 +7,32 @@
 
 int main(int argc, const char* argv[]) {
     VM vm;
-    initVM(&vm);
-
     Chunk chunk;
+    
+    initVM(&vm);
     initChunk(&chunk);
 
-    int constantIndex = addConstant(&chunk, 1.2);
+    
+    int constIndex = addConstant(&chunk, 1.2);
     writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constantIndex, 123);
+    writeChunk(&chunk, constIndex, 123);
+
+    constIndex = addConstant(&chunk, 3.4);
+    writeChunk(&chunk, OP_CONSTANT, 123);
+    writeChunk(&chunk, constIndex, 123);
+
+    writeChunk(&chunk, OP_ADD, 123);
+
+    constIndex = addConstant(&chunk, 5.6);
+    writeChunk(&chunk, OP_CONSTANT, 123);
+    writeChunk(&chunk, constIndex, 123);
+
+    writeChunk(&chunk, OP_DIVIDE, 123);
+
     writeChunk(&chunk, OP_NEGATE, 123);
 
     writeChunk(&chunk, OP_RETURN, 123);
+
 
     disassembleChunk(&chunk, "test chunk");
     interpret(&vm, &chunk);
