@@ -19,6 +19,7 @@ typedef struct {
     int count;
     int capacity;
     uint8_t* pCode;
+    int* pLines;
     ValueArray constants;
 } Chunk;
 
@@ -34,8 +35,9 @@ void initChunk(Chunk* pChunk);
  * 
  * @param pChunk Pointer to the chunk to add the byte to
  * @param byte The byte to add
+ * @param line The line number of where byte is located
  */
-void writeChunk(Chunk* pChunk, uint8_t byte);
+void writeChunk(Chunk* pChunk, uint8_t byte, int line);
 
 /**
  * @brief Deallocates all of the memory used by the chunk and

@@ -34,6 +34,12 @@ void disassembleChunk(Chunk* pChunk, const char* pName) {
 int disassembleInstruction(Chunk* pChunk, int offset) {
     printf("%04d ", offset);
 
+    if (offset > 0 && pChunk->pLines[offset] == pChunk->pLines[offset - 1]) {
+        printf("   | ");
+    } else {
+        printf("%4d ", pChunk->pLines[offset]);
+    }
+
     uint8_t instruction = pChunk->pCode[offset];
     switch (instruction) {
         case OP_CONSTANT:
