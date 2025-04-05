@@ -28,6 +28,11 @@ static InterpretResult run(VM* pVM) {
                 break;
             }
 
+            case OP_NEGATE: {
+                push(pVM, -pop(pVM));
+                break;
+            }
+
             case OP_RETURN: {
                 printValue(pop(pVM));
                 printf("\n");
