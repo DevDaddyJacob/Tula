@@ -9,6 +9,10 @@
 			"path": "tula-docs"
 		},
 		{
+			"name": "tests",
+			"path": "test"
+		},
+		{
 			"name": "c",
 			"path": "tula-c"
 		}
