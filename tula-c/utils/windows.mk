@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -Wno-unused-parameter
+CFLAGS := -g -Wall -Wextra -Werror -Wno-unused-parameter
 BINARY_DIR := $(BINARY_DIR_ROOT)/windows
 OBJECT_DIR := $(OBJECTS_DIR_ROOT)/windows
 EXE := $(BINARY_DIR)/$(NAME)

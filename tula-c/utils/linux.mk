@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -g
+CFLAGS := -g -Wall -Wextra -Werror -Wno-unused-parameter
 BINARY_DIR := $(BINARY_DIR_ROOT)/linux
 OBJECT_DIR := $(OBJECTS_DIR_ROOT)/linux
 EXE := $(BINARY_DIR)/$(NAME)
