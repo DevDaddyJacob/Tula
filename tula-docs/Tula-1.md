@@ -29,8 +29,6 @@ The following operators are going to be used:
     - __greater than or equal__ [`>=` infix operator] (x >= y)
     - __value equality__ [`==` infix operator] (x == y)
     - __value inequality__ [`!=` infix operator] (x != y)
-    - __type equality__ [`===` infix operator] (x === y)
-    - __type inequality__ [`!==` infix operator] (x !== y)
   - Logical
     - __not__ [`!` prefix operator] (!x)
     - __and__ [`and` infix operator] (x and y)
