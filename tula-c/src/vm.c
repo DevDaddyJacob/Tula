@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -84,10 +85,22 @@ void freeVM(VM* pVM) {
     
 }
 
-InterpretResult interpret(VM* pVM, Chunk* pChunk) {
-    pVM->pChunk = pChunk;
+InterpretResult interpret(VM* pVM, const char* source) {
+    Chunk chunk;
+    initChunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    pVM->pChunk = &chunk;
     pVM->pIP = pVM->pChunk->pCode;
-    return run(pVM);
+
+    InterpretResult result = run(pVM);
+
+    freeChunk(&chunk);
+    return result;
 }
 
 void push(VM* pVM, Value value) {

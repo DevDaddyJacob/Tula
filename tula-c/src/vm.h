@@ -40,10 +40,10 @@ void freeVM(VM* pVM);
  * @brief Instructs a VM to interpert a chunk
  * 
  * @param pVM Pointer to the VM
- * @param pChunk Pointer to the chunk
+ * @param source The source code to interpret
  * @return InterpretResult The result of the interpertation
  */
-InterpretResult interpret(VM* pVM, Chunk* pChunk);
+InterpretResult interpret(VM* pVM, const char* source);
 
 /**
  * @brief Pushes a value onto the top of the VM's stack
