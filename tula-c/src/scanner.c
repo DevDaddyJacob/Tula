@@ -49,6 +49,51 @@ static Token errorToken(const char* message) {
     return token;
 }
 
+static char peek() {
+    return *scanner.current;
+}
+
+static char peekNext() {
+    if (isAtEnd()) return '\0';
+    return scanner.current[1];
+}
+
+static bool match(char expected) {
+    if (isAtEnd()) return false;
+    if (*scanner.current != expected) return false;
+    scanner.current++;
+    return true;
+}
+
+static void skipWhitespace() {
+    for (;;) {
+        char c = peek();
+        switch (c) {
+            case ' ':
+            case '\r':
+            case '\t':
+                advance();
+                break;
+
+            case '\n':
+                scanner.line++;
+                advance();
+                break;
+
+            case '/':
+                if (peekNext() == '/') {
+                    // A comment goes until the end of the line.
+                    while (peek() != '\n' && !isAtEnd()) advance();
+                } else {
+                    return;
+                }
+                break;
+            
+            default:
+                return;
+        }
+    }
+}
 
 static TokenType checkKeyword(int start, int length,
     const char* rest, TokenType type) {
@@ -70,7 +115,6 @@ static TokenType identifierType() {
 
         case 'e':
             return checkKeyword(1, 3, "lse", TOKEN_ELSE);
-
 
         case 'f':
             if (scanner.current - scanner.start > 1) {
@@ -127,52 +171,6 @@ static TokenType identifierType() {
     }
 
     return TOKEN_IDENTIFIER;
-}
-
-static char peek() {
-    return *scanner.current;
-}
-
-static char peekNext() {
-    if (isAtEnd()) return '\0';
-    return scanner.current[1];
-}
-
-static bool match(char expected) {
-    if (isAtEnd()) return false;
-    if (*scanner.current != expected) return false;
-    scanner.current++;
-    return true;
-}
-
-static void skipWhitespace() {
-    for (;;) {
-        char c = peek();
-        switch (c) {
-            case ' ':
-            case '\r':
-            case '\t':
-                advance();
-                break;
-
-            case '\n':
-                scanner.line++;
-                advance();
-                break;
-
-            case '/':
-                if (peekNext() == '/') {
-                    // A comment goes until the end of the line.
-                    while (peek() != '\n' && !isAtEnd()) advance();
-                } else {
-                    return;
-                }
-                break;
-            
-            default:
-                return;
-        }
-    }
 }
 
 static Token string() {
