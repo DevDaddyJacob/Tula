@@ -1,18 +1,24 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "value.h"
 #include "vm.h"
 
 static InterpretResult run(VM* pVM) {
 #define READ_BYTE() (*pVM->pIP++)
 #define READ_CONSTANT() (pVM->pChunk->constants.pValues[READ_BYTE()])
-#define BINARY_OP(op) \
+#define BINARY_OP(valueType, op) \
     do { \
-        double b = pop(pVM); \
-        double a = pop(pVM); \
-        push(pVM, a op b); \
+        if (!IS_NUMBER(peek(pVM, 0)) || !IS_NUMBER(peek(pVM, 1))) { \
+            runtimeError(pVM, "Operands must be numbers."); \
+            return INTERPRET_RUNTIME_ERROR; \
+        } \
+        double b = AS_NUMBER(pop(pVM)); \
+        double a = AS_NUMBER(pop(pVM)); \
+        push(pVM, valueType(a op b)); \
     } while (false)
 
     for (;;) {
@@ -29,34 +35,23 @@ static InterpretResult run(VM* pVM) {
 
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
+            case OP_ADD: BINARY_OP(NUMBER_VAL, +); break;
+            case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
+            case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
+            case OP_DIVIDE: BINARY_OP(NUMBER_VAL, /); break;
+            
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(pVM, constant);
                 break;
             }
 
-            case OP_ADD: {
-                BINARY_OP(+);
-                break;
-            }
-
-            case OP_SUBTRACT: {
-                BINARY_OP(-);
-                break;
-            }
-
-            case OP_MULTIPLY: {
-                BINARY_OP(*);
-                break;
-            }
-
-            case OP_DIVIDE: {
-                BINARY_OP(/);
-                break;
-            }
-            
             case OP_NEGATE: {
-                push(pVM, -pop(pVM));
+                if (!IS_NUMBER(peek(pVM, 0))) {
+                    runtimeError(pVM, "Operand must be a number.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(pVM, NUMBER_VAL(-AS_NUMBER(pop(pVM))));
                 break;
             }
 
@@ -75,6 +70,19 @@ static InterpretResult run(VM* pVM) {
 
 static void resetStack(VM* pVM) {
     pVM->pStackTop = pVM->stack;
+}
+
+static void runtimeError(VM* pVM, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+  
+    size_t instruction = pVM->pIP - pVM->pChunk->pCode - 1;
+    int line = pVM->pChunk->pLines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+    resetStack(pVM);
 }
 
 void initVM(VM* pVM) {
@@ -117,4 +125,8 @@ Value pop(VM* pVM) {
 
     // Dereference and return the value in that position
     return *pVM->pStackTop;
+}
+
+static Value peek(VM* pVM, int distance) {
+    return pVM->pStackTop[-1 - distance];
 }
