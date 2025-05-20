@@ -1,23 +1,30 @@
 #include "value.h"
 #include "../utils/arrays.h"
 
-void initValueArray(ValueArray* array) {
+
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
+void tula_initValueArray(ValueArray* array) {
     array->count = 0;
     array->capacity = 0;
     array->values = NULL;
 }
 
 
-void freeValueArray(ValueArray* array) {
+void tula_freeValueArray(ValueArray* array) {
     /* Deallocate the array */
     FREE_ARRAY(Value, array->values, array->capacity);
     
     /* Zero out the fields */
-    initValueArray(array);
+    tula_initValueArray(array);
 }
 
 
-void writeValueArray(ValueArray* array, Value value) {
+void tula_writeValueArray(ValueArray* array, Value value) {
     /* Check if we need to expand the array size */
     if (array->capacity < array->count + 1) {
         int oldCapacity = array->capacity;

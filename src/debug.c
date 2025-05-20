@@ -1,10 +1,27 @@
 #include <stdio.h>
 
-#include "common.h"
 #include "debug.h"
+#include "common.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+/*
+ * ==================================================
+ * Typedefs & Prototypes
+ * ==================================================
+ */
+
+static int simpleInstruction(const char* name, int offset);
+
+static int constantInstruction(const char* name, Chunk* chunk, int offset);
+
+
+/*
+ * ==================================================
+ * Module Level Variables & Constants
+ * ==================================================
+ */
 
 #ifdef TULA_DEBUG
 
@@ -103,55 +120,32 @@ const char* InterpretResults[] = {
 #endif
 
 
-
-void printToken(Token* token) {
-#ifdef TULA_DEBUG
-    printf(
-        "Token:{type:%s, start:%p, length:%d, line:%d}\n",
-        TokenTypes[token->type],
-        token->start,
-        token->length,
-        token->line
-    );
-#endif /* TULA_DEBUG */
-}
-
-
-void disassembleChunk(Chunk* chunk, const char* name) {
-#ifdef TULA_DEBUG
-    printf("== %s ==\n", name);
-  
-    for (int offset = 0; offset < chunk->count;) {
-        offset = disassembleInstruction(chunk, offset);
-    }
-#endif /* TULA_DEBUG */
-}
-
-
-void printValue(Value value) {
-#ifdef TULA_DEBUG
-    printf("%g", value);
-#endif /* TULA_DEBUG */
-}
-
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
 
 #ifdef TULA_DEBUG
 static int simpleInstruction(const char* name, int offset) {
     printf(" %s\n", name);
     return offset + 1;
 }
+#endif /* TULA_DEBUG */
 
+
+#ifdef TULA_DEBUG
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t constant = chunk->code[offset + 1];
     printf(" %-16s %10d   '", name, constant);
-    printValue(chunk->constants.values[constant]);
+    tula_printValue(chunk->constants.values[constant]);
     printf("'\n");
     return offset + 2;
 }
 #endif /* TULA_DEBUG */
 
 
-int disassembleInstruction(Chunk* chunk, int offset) {
+int tula_disassembleInstruction(Chunk* chunk, int offset) {
 #ifdef TULA_DEBUG
     printf("  %04d  ", offset);
 
@@ -181,6 +175,46 @@ int disassembleInstruction(Chunk* chunk, int offset) {
     }
 #else
     return 0;
+#endif /* TULA_DEBUG */
+}
+
+
+void tula_printToken(Token* token) {
+#ifdef TULA_DEBUG
+    printf(
+        "Token:{type:%s, start:%p, length:%d, line:%d}\n",
+        TokenTypes[token->type],
+        token->start,
+        token->length,
+        token->line
+    );
+#endif /* TULA_DEBUG */
+}
+
+
+void tula_disassembleChunk(Chunk* chunk, const char* name) {
+#ifdef TULA_DEBUG
+    printf("== %s ==\n", name);
+    
+    printf(
+        "%-7s| %-7s| %-16s| %-10s| %-10s\n",
+        "Offset",
+        "Line #",
+        "OpCode",
+        "Const Idx",
+        "Const Val"
+    );
+    
+    for (int offset = 0; offset < chunk->count;) {
+        offset = tula_disassembleInstruction(chunk, offset);
+    }
+#endif /* TULA_DEBUG */
+}
+
+
+void tula_printValue(Value value) {
+#ifdef TULA_DEBUG
+    printf("%g", value);
 #endif /* TULA_DEBUG */
 }
 

@@ -17,14 +17,14 @@ typedef struct {
  * \brief           Initializes the provided array
  * \param[in]       array: Pointer to the array to initialize
  */
-void initValueArray(ValueArray* array);
+void tula_initValueArray(ValueArray* array);
 
 
 /**
  * \brief           Releases the provided array
  * \param[in]       array: Pointer to the array to free
  */
-void freeValueArray(ValueArray* array);
+void tula_freeValueArray(ValueArray* array);
 
 
 /**
@@ -32,7 +32,7 @@ void freeValueArray(ValueArray* array);
  * \param[in]       array: Pointer to the array to write to
  * \param[in]       value: The value to write to the array
  */
-void writeValueArray(ValueArray* array, Value value);
+void tula_writeValueArray(ValueArray* array, Value value);
 
 
 #endif /* tulac_value_h */

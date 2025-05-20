@@ -6,7 +6,11 @@
 #include "debug.h"
 #include "./utils/log.h"
 
-char* PROGRAM_NAME;
+/*
+ * ==================================================
+ * Typedefs & Prototypes
+ * ==================================================
+ */
 
 typedef enum {
     PARSE_OK,
@@ -24,18 +28,41 @@ typedef enum {
     OPTION_SCRIPT_FILE
 } CliOptions;
 
+
+static BOOL strprefix(const char* str, const char* pre);
+
+static void initState(TulaState* state);
+
+static CliOptions checkArg(
+    const char* arg,
+    const char* match,
+    CliOptions option
+);
+
+static CliOptions parseArg(TulaState* state, const char* arg);
+
+
+/*
+ * ==================================================
+ * Module Level Variables & Constants
+ * ==================================================
+ */
+
+char* PROGRAM_NAME;
+
+
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
 static BOOL strprefix(const char* str, const char* pre) {
     if (strncmp(pre, str, strlen(pre)) == 0) {
         return TRUE;
     } else {
         return FALSE;
     }
-}
-
-
-void freeState(TulaState* state) {
-    free(state);
-    state = NULL;
 }
 
 
@@ -91,7 +118,13 @@ static CliOptions parseArg(TulaState* state, const char* arg) {
 }
 
 
-void parseCliArgs(int argc, const char* argv[], TulaState* state) {
+void tula_freeState(TulaState* state) {
+    free(state);
+    state = NULL;
+}
+
+
+void tula_parseCliArgs(int argc, const char* argv[], TulaState* state) {
     initState(state);
 
     PROGRAM_NAME = argv[0];
@@ -135,7 +168,7 @@ void parseCliArgs(int argc, const char* argv[], TulaState* state) {
 
             case OPTION_INVALID:
             default: {
-                printfErr(
+                tula_printfErr(
                     "bad option '%s'\n",
                     argv[i]
                 );

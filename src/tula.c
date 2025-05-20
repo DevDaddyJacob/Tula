@@ -17,7 +17,7 @@ TulaState TULA_STATE;
 static char* readFile(const char* path) {
     FILE* file = fopen(path, "rb");
     if (file == NULL) {
-        printfErr("Could not open file \"%s\".\n", path);
+        tula_printfErr("Could not open file \"%s\".\n", path);
         exit(74);
     }
   
@@ -29,13 +29,13 @@ static char* readFile(const char* path) {
 
     char* buffer = (char*)malloc(fileSize + 1);
     if (buffer == NULL) {
-        printfErr("Not enough memory to read \"%s\".\n", path);
+        tula_printfErr("Not enough memory to read \"%s\".\n", path);
         exit(74);
     }
 
     size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
     if (bytesRead < fileSize) {
-        printfErr("Could not read file \"%s\".\n", path);
+        tula_printfErr("Could not read file \"%s\".\n", path);
         exit(74);
     }
 
@@ -59,21 +59,21 @@ static void repl() {
             break;
         }
 
-        initScanner(&scanner, line);
+        tula_initScanner(&scanner, line);
         
         do {
-            token = scanToken(&scanner);
-            printToken(&token);
+            token = tula_scanToken(&scanner);
+            tula_printToken(&token);
         } while (token.type != TOKEN_EOF);
     }
 }
 
 static void executeFile(const char* path) {
     VM vm;
-    initVM(&vm);
+    tula_initVM(&vm);
 
     char* source = readFile(path);
-    InterpretResult result = interpretSource(&vm, source);
+    InterpretResult result = tula_interpretSource(&vm, source);
     free(source); 
   
     if (result == INTERPRET_COMPILE_ERROR) exit(65);
@@ -84,39 +84,39 @@ static void debug() {
     VM vm;
     Chunk chunk;
 
-    initVM(&vm);
-    initChunk(&chunk);
+    tula_initVM(&vm);
+    tula_initChunk(&chunk);
 
-    int constantIndex = addChunkConstant(&chunk, 1.2);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constantIndex, 123);
+    int constantIndex = tula_addChunkConstant(&chunk, 1.2);
+    tula_writeChunk(&chunk, OP_CONSTANT, 123);
+    tula_writeChunk(&chunk, constantIndex, 123);
   
-    constantIndex = addChunkConstant(&chunk, 3.4);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constantIndex, 123);
+    constantIndex = tula_addChunkConstant(&chunk, 3.4);
+    tula_writeChunk(&chunk, OP_CONSTANT, 123);
+    tula_writeChunk(&chunk, constantIndex, 123);
   
-    writeChunk(&chunk, OP_ADD, 123);
+    tula_writeChunk(&chunk, OP_ADD, 123);
   
-    constantIndex = addChunkConstant(&chunk, 5.6);
-    writeChunk(&chunk, OP_CONSTANT, 123);
-    writeChunk(&chunk, constantIndex, 123);
+    constantIndex = tula_addChunkConstant(&chunk, 5.6);
+    tula_writeChunk(&chunk, OP_CONSTANT, 123);
+    tula_writeChunk(&chunk, constantIndex, 123);
   
-    writeChunk(&chunk, OP_DIVIDE, 123);
-    writeChunk(&chunk, OP_NEGATE, 123);
+    tula_writeChunk(&chunk, OP_DIVIDE, 123);
+    tula_writeChunk(&chunk, OP_NEGATE, 123);
   
-    writeChunk(&chunk, OP_RETURN, 123);
+    tula_writeChunk(&chunk, OP_RETURN, 123);
     
-    interpretChunk(&vm, &chunk);
+    tula_interpretChunk(&vm, &chunk);
 
     // return -((1.2 + 3.4) / 5.6)
 
-    freeChunk(&chunk);
-    freeVM(&vm);
+    tula_freeChunk(&chunk);
+    tula_freeVM(&vm);
 }
 
 
 int main(int argc, const char* argv[]) {
-    parseCliArgs(argc, argv, &TULA_STATE);
+    tula_parseCliArgs(argc, argv, &TULA_STATE);
     printf(
         "TulaState={helpMenu:%d,interactive:%d,helpItem:\"%s\",scriptFile:\"%s\"}\n",
         TULA_STATE.helpMenu,
@@ -135,10 +135,10 @@ int main(int argc, const char* argv[]) {
         printf("Help menu");
 
     } else {
-        printfErr("Improper usage");
+        tula_printfErr("Improper usage");
         EXIT_CODE = 1;
     }
 
-    freeState(&TULA_STATE);
+    tula_freeState(&TULA_STATE);
     return EXIT_CODE;
 }

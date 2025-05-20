@@ -25,14 +25,14 @@ typedef struct {
  * \brief           Initializes the provided VM
  * \param[in]       vm: Pointer to the VM to initialize
  */
-void initVM(VM* vm);
+void tula_initVM(VM* vm);
 
 
 /**
  * \brief           Releases the provided VM from memory
  * \param[in]       vm: Pointer to the VM to free
  */
-void freeVM(VM* vm);
+void tula_freeVM(VM* vm);
 
 
 /**
@@ -41,7 +41,7 @@ void freeVM(VM* vm);
  * \param[in]       chunk: Pointer to the bytecode to interpert
  * \return          Returns the interpertation result
  */
-InterpretResult interpretChunk(VM* vm, Chunk* chunk);
+InterpretResult tula_interpretChunk(VM* vm, Chunk* chunk);
 
 
 /**
@@ -50,7 +50,7 @@ InterpretResult interpretChunk(VM* vm, Chunk* chunk);
  * \param[in]       source: Pointer to the source code
  * \return          Returns the interpertation result
  */
-InterpretResult interpretSource(VM* vm, const char* source);
+InterpretResult tula_interpretSource(VM* vm, const char* source);
 
 
 /**
@@ -58,7 +58,7 @@ InterpretResult interpretSource(VM* vm, const char* source);
  * \param[in]       vm: Pointer to the VM to use
  * \param[in]       value: The value to add to the stack
  */
-void vmStackPush(VM* vm, Value value);
+void tula_vmStackPush(VM* vm, Value value);
 
 
 /**
@@ -67,6 +67,6 @@ void vmStackPush(VM* vm, Value value);
  * \param[in]       vm: Pointer to the VM to use
  * \return          Returns the top value on the vm's stack
  */
-Value vmStackPop(VM* vm);
+Value tula_vmStackPop(VM* vm);
 
 #endif /* tulac_vm_h */

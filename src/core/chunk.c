@@ -3,29 +3,35 @@
 #include "../utils/arrays.h"
 
 
-void initChunk(Chunk* chunk) {
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
+void tula_initChunk(Chunk* chunk) {
     chunk->count = 0;
     chunk->capacity = 0;
     chunk->code = NULL;
     chunk->lines = NULL;
-    initValueArray(&(chunk->constants));
+    tula_initValueArray(&(chunk->constants));
 }
 
 
-void freeChunk(Chunk* chunk) {
+void tula_freeChunk(Chunk* chunk) {
     /* Deallocate the bytecode and lines arrays */
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     FREE_ARRAY(int, chunk->lines, chunk->capacity);
     
     /* Deallocate the constants array too */
-    freeValueArray(&(chunk->constants));
+    tula_freeValueArray(&(chunk->constants));
 
     /* Zero out the fields */
-    initChunk(chunk);
+    tula_initChunk(chunk);
 }
 
 
-void writeChunk(Chunk* chunk, uint8_t byte, int line) {
+void tula_writeChunk(Chunk* chunk, uint8_t byte, int line) {
     /* Check if we need to expand the array size */
     if (chunk->capacity < chunk->count + 1) {
         int oldCapacity = chunk->capacity;
@@ -51,7 +57,7 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
 }
 
 
-int addChunkConstant(Chunk* chunk, Value value) {
-    writeValueArray(&(chunk->constants), value);
+int tula_addChunkConstant(Chunk* chunk, Value value) {
+    tula_writeValueArray(&(chunk->constants), value);
     return chunk->constants.count - 1;
 }

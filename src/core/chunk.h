@@ -94,14 +94,14 @@ typedef struct {
  * \brief           Initializes the provided chunk
  * \param[in]       chunk: Pointer to the chunk to initialize
  */
-void initChunk(Chunk* chunk);
+void tula_initChunk(Chunk* chunk);
 
 
 /**
  * \brief           Releases the provided chunk
  * \param[in]       chunk: Pointer to the chunk to free
  */
-void freeChunk(Chunk* chunk);
+void tula_freeChunk(Chunk* chunk);
 
 
 /**
@@ -110,7 +110,7 @@ void freeChunk(Chunk* chunk);
  * \param[in]       byte: The bytecode to write to the chunk
  * \param[in]       line: The line number the bytecode is located on
  */
-void writeChunk(Chunk* chunk, uint8_t byte, int line);
+void tula_writeChunk(Chunk* chunk, uint8_t byte, int line);
 
 
 /**
@@ -119,6 +119,6 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line);
  * \param[in]       value: The value to write to the chunk's constant array
  * \return          Returns the index of where the constant was appended
  */
-int addChunkConstant(Chunk* chunk, Value value);
+int tula_addChunkConstant(Chunk* chunk, Value value);
 
 #endif /* tulac_chunk_h */

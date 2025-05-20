@@ -2,13 +2,18 @@
 #define tulac_debug_h
 
 #include "conf.h"
+
+#ifdef TULA_DEBUG
+
 #include "core/scanner.h"
 #include "core/chunk.h"
 #include "core/value.h"
 
-void printToken(Token* token);
-void disassembleChunk(Chunk* chunk, const char* name);
-int disassembleInstruction(Chunk* chunk, int offset);
-void printValue(Value value);
+void tula_printToken(Token* token);
+void tula_disassembleChunk(Chunk* chunk, const char* name);
+int tula_disassembleInstruction(Chunk* chunk, int offset);
+void tula_printValue(Value value);
+
+#endif /* TULA_DEBUG */
 
 #endif /* tulac_debug_h */

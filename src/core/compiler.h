@@ -12,6 +12,6 @@
  * \return          Returns 1 if the source was compiled successfully, 
  *                  and 0 otherwise
  */
-BOOL compile(const char* source, Chunk* chunk);
+BOOL tula_compile(const char* source, Chunk* chunk);
 
 #endif /* tulac_compiler_h */

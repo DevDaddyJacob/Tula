@@ -22,14 +22,14 @@ typedef struct {
  * \param[in]       argv: Argument vector (from main)
  * \param[out]      state: The state to initialize
  */
-void parseCliArgs(int argc, const char* argv[], TulaState* state);
+void tula_parseCliArgs(int argc, const char* argv[], TulaState* state);
 
 
 /**
  * \brief           Frees the provided state from memory
  * \param[in]       state: The state to free
  */
-void freeState(TulaState* state);
+void tula_freeState(TulaState* state);
 
 
 #endif /* tulac_cli_h */

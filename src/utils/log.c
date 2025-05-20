@@ -6,9 +6,31 @@
 #include "log.h"
 
 
+/*
+ * ==================================================
+ * Module Level Variables & Constants
+ * ==================================================
+ */
+
 extern char* PROGRAM_NAME;
 
-void printfErr(const char *const format, ...) {
+
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
+void tula_rawPrintfErr(const char *const format, ...) {
+    // Handle variadic arguments
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+}
+
+
+void tula_printfErr(const char *const format, ...) {
     /* Calculate length for the new format string */
     size_t newFormatLen = strlen(PROGRAM_NAME) + strlen(format) + 10;
     char* newFormat = malloc(newFormatLen);

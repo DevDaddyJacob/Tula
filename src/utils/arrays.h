@@ -11,7 +11,7 @@
 
 
 #define GROW_ARRAY(type, pointer, oldCount, newCount) \
-    (type*)reallocateArray( \
+    (type*)tula_reallocateArray( \
         pointer, \
         sizeof(type) * (oldCount), \
         sizeof(type) * (newCount) \
@@ -19,7 +19,7 @@
 
 
 #define FREE_ARRAY(type, pointer, oldCount) \
-    reallocateArray(pointer, sizeof(type) * (oldCount), 0)
+    tula_reallocateArray(pointer, sizeof(type) * (oldCount), 0)
 
     
 /**
@@ -30,7 +30,7 @@
  * \param[in]       newSize: The new size of the array
  * \return          Returns a pointer to the new array
  */
-void* reallocateArray(void* pointer, size_t oldSize, size_t newSize);
+void* tula_reallocateArray(void* pointer, size_t oldSize, size_t newSize);
 
 
 

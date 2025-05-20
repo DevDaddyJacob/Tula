@@ -1,16 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../common.h"
 #include "scanner.h"
+#include "../common.h"
 
-
-void initScanner(Scanner* scanner, const char* source) {
-    scanner->start = source;
-    scanner->current = source;
-    scanner->line = 1;
-}
-
+/*
+ * ==================================================
+ * Typedefs & Prototypes
+ * ==================================================
+ */
 
 /**
  * \brief           Creates from the scanner the given token type
@@ -18,14 +16,7 @@ void initScanner(Scanner* scanner, const char* source) {
  * \param[in]       type: The type of token to make
  * \return          Returns the created token
  */
-static Token makeToken(Scanner* scanner, TokenType type) {
-    Token token;
-    token.type = type;
-    token.start = scanner->start;
-    token.length = (int8_t)(scanner->current - scanner->start);
-    token.line = scanner->line;
-    return token;
-}
+static Token makeToken(Scanner* scanner, TokenType type);
 
 
 /**
@@ -34,14 +25,7 @@ static Token makeToken(Scanner* scanner, TokenType type) {
  * \param[in]       message: The error message
  * \return          Returns the created error token
  */
-static Token errorToken(Scanner* scanner, const char* message) {
-    Token token;
-    token.type = TOKEN_ERROR;
-    token.start = message;
-    token.length = (int8_t)strlen(message);
-    token.line = scanner->line;
-    return token;
-}
+static Token errorToken(Scanner* scanner, const char* message);
 
 
 /**
@@ -50,14 +34,7 @@ static Token errorToken(Scanner* scanner, const char* message) {
  * \param[in]       c: The character to check
  * \return          Returns 1 if the character is alphabetical, and 0 otherwise
  */
-static BOOL isAplha(char c) {
-    if (
-        (c >= 'a' && c <= 'z') ||
-        (c >= 'A' && c <= 'Z') ||
-        c == '_'
-    ) return TRUE;
-    else return FALSE;
-}
+static BOOL isAplha(char c);
 
 
 /**
@@ -66,10 +43,7 @@ static BOOL isAplha(char c) {
  * \param[in]       c: The character to check
  * \return          Returns 1 if the character is a digit, and 0 otherwise
  */
-static BOOL isDigit(char c) {
-    if (c >= '0' && c <= '9') return TRUE;
-    else return FALSE;
-}
+static BOOL isDigit(char c);
 
 
 /**
@@ -79,10 +53,7 @@ static BOOL isDigit(char c) {
  * \return          Returns 1 if the scanner is at the end of the line, 
  *                  and 0 otherwise
  */
-static BOOL isAtEnd(Scanner* scanner) {
-    if (*(scanner->current) == '\0') return TRUE;
-    else return FALSE;
-}
+static BOOL isAtEnd(Scanner* scanner);
 
 
 /**
@@ -90,10 +61,7 @@ static BOOL isAtEnd(Scanner* scanner) {
  * \param[in]       scanner: Pointer to a scanner
  * \return          Returns the current character
  */
-static char advance(Scanner* scanner) {
-    scanner->current++;
-    return scanner->current[-1];
-}
+static char advance(Scanner* scanner);
 
 
 /**
@@ -101,9 +69,7 @@ static char advance(Scanner* scanner) {
  * \param[in]       scanner: Pointer to a scanner
  * \return          Returns the current character
  */
-static char peek(Scanner* scanner) {
-    return *(scanner->current);
-}
+static char peek(Scanner* scanner);
 
 
 /**
@@ -111,10 +77,7 @@ static char peek(Scanner* scanner) {
  * \param[in]       scanner: Pointer to a scanner
  * \return          Returns the next character
  */
-static char peekNext(Scanner* scanner) {
-    if (isAtEnd(scanner)) return '\0';
-    return scanner->current[1];
-}
+static char peekNext(Scanner* scanner);
 
 
 /**
@@ -126,6 +89,134 @@ static char peekNext(Scanner* scanner) {
  * \return          Returns 1 if the current character is the expected one, 
  *                  and 0 otherwise
  */
+static BOOL match(Scanner* scanner, char expected);
+
+
+/**
+ * \brief           Walks the scanner until the next token is not whitespace
+ * \param[in]       scanner: Pointer to a scanner
+ */
+static void skipWhitespace(Scanner* scanner);
+
+
+/**
+ * \brief           Used to test the rest of a potential keyword
+ * \param[in]       scanner: Pointer to a scanner
+ * \param[in]       start: How many characters into the lexeme to start 
+ *                  checking from
+ * \param[in]       length: The length of the remaining characters
+ * \param[in]       rest: The remaining characters to check for
+ * \param[in]       type: The type of the token to return if a match is found
+ * \return          Returns the type param if there is a match, otherwise
+ *                  TOKEN_IDENTIFIER is returned
+ */
+static TokenType checkKeyword(
+    Scanner* scanner, 
+    int start, 
+    int length, 
+    const char* rest, 
+    TokenType type
+);
+
+
+/**
+ * \brief           Walks the lexeme and checks if it is a reserved word
+ * \param[in]       scanner: Pointer to a scanner
+ * \return          Returns the token type if there is a match, otherwise
+ *                  TOKEN_IDENTIFIER is returned
+ */
+static TokenType identifierType(Scanner* scanner);
+
+
+/**
+ * \brief           Scans the rest of a identifier
+ * \param[in]       scanner: Pointer to a scanner
+ * \return          Returns the created token for the identifier
+ */
+static Token scanIdentifier(Scanner* scanner);
+
+
+/**
+ * \brief           Scans the rest of a number
+ * \param[in]       scanner: Pointer to a scanner
+ * \return          Returns the created number token
+ */
+static Token scanNumber(Scanner* scanner);
+
+
+/**
+ * \brief           Scans the rest of a string
+ * \param[in]       scanner: Pointer to a scanner
+ * \return          Returns the created string token
+ */
+static Token scanString(Scanner* scanner);
+
+
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
+static Token makeToken(Scanner* scanner, TokenType type) {
+    Token token;
+    token.type = type;
+    token.start = scanner->start;
+    token.length = (int8_t)(scanner->current - scanner->start);
+    token.line = scanner->line;
+    return token;
+}
+
+
+static Token errorToken(Scanner* scanner, const char* message) {
+    Token token;
+    token.type = TOKEN_ERROR;
+    token.start = message;
+    token.length = (int8_t)strlen(message);
+    token.line = scanner->line;
+    return token;
+}
+
+
+static BOOL isAplha(char c) {
+    if (
+        (c >= 'a' && c <= 'z') ||
+        (c >= 'A' && c <= 'Z') ||
+        c == '_'
+    ) return TRUE;
+    else return FALSE;
+}
+
+
+static BOOL isDigit(char c) {
+    if (c >= '0' && c <= '9') return TRUE;
+    else return FALSE;
+}
+
+
+static BOOL isAtEnd(Scanner* scanner) {
+    if (*(scanner->current) == '\0') return TRUE;
+    else return FALSE;
+}
+
+
+static char advance(Scanner* scanner) {
+    scanner->current++;
+    return scanner->current[-1];
+}
+
+
+static char peek(Scanner* scanner) {
+    return *(scanner->current);
+}
+
+
+static char peekNext(Scanner* scanner) {
+    if (isAtEnd(scanner)) return '\0';
+    return scanner->current[1];
+}
+
+
 static BOOL match(Scanner* scanner, char expected) {
     if (isAtEnd(scanner)) return FALSE;
     if (*(scanner->current) != expected) return FALSE;
@@ -134,10 +225,6 @@ static BOOL match(Scanner* scanner, char expected) {
 }
 
 
-/**
- * \brief           Walks the scanner until the next token is not whitespace
- * \param[in]       scanner: Pointer to a scanner
- */
 static void skipWhitespace(Scanner* scanner) {
     for (;;) {
         char c = peek(scanner);
@@ -174,17 +261,6 @@ static void skipWhitespace(Scanner* scanner) {
 }
 
 
-/**
- * \brief           Used to test the rest of a potential keyword
- * \param[in]       scanner: Pointer to a scanner
- * \param[in]       start: How many characters into the lexeme to start 
- *                  checking from
- * \param[in]       length: The length of the remaining characters
- * \param[in]       rest: The remaining characters to check for
- * \param[in]       type: The type of the token to return if a match is found
- * \return          Returns the type param if there is a match, otherwise
- *                  TOKEN_IDENTIFIER is returned
- */
 static TokenType checkKeyword(
     Scanner* scanner, 
     int start, 
@@ -203,12 +279,6 @@ static TokenType checkKeyword(
 }
 
 
-/**
- * \brief           Walks the lexeme and checks if it is a reserved word
- * \param[in]       scanner: Pointer to a scanner
- * \return          Returns the token type if there is a match, otherwise
- *                  TOKEN_IDENTIFIER is returned
- */
 static TokenType identifierType(Scanner* scanner) {
     switch (scanner->start[0]) {
         case 'a': return checkKeyword(scanner, 1, 2, "nd", TOKEN_AND);
@@ -252,22 +322,12 @@ static TokenType identifierType(Scanner* scanner) {
 }
 
 
-/**
- * \brief           Scans the rest of a identifier
- * \param[in]       scanner: Pointer to a scanner
- * \return          Returns the created token for the identifier
- */
 static Token scanIdentifier(Scanner* scanner) {
     while (isAplha(peek(scanner)) || isDigit(peek(scanner))) advance(scanner);
     return makeToken(scanner, identifierType(scanner));
 }
 
 
-/**
- * \brief           Scans the rest of a number
- * \param[in]       scanner: Pointer to a scanner
- * \return          Returns the created number token
- */
 static Token scanNumber(Scanner* scanner) {
     while (isDigit(peek(scanner))) advance(scanner);
 
@@ -281,11 +341,6 @@ static Token scanNumber(Scanner* scanner) {
 }
 
 
-/**
- * \brief           Scans the rest of a string
- * \param[in]       scanner: Pointer to a scanner
- * \return          Returns the created string token
- */
 static Token scanString(Scanner* scanner) {
     /* Keep scanning until we hit a string terminator, or the end of file */
     while (peek(scanner) != '"' && !isAtEnd(scanner)) {
@@ -301,7 +356,14 @@ static Token scanString(Scanner* scanner) {
 }
 
 
-Token scanToken(Scanner* scanner) {
+void tula_initScanner(Scanner* scanner, const char* source) {
+    scanner->start = source;
+    scanner->current = source;
+    scanner->line = 1;
+}
+
+
+Token tula_scanToken(Scanner* scanner) {
     char c;
     skipWhitespace(scanner);
     scanner->start = scanner->current;
@@ -347,8 +409,3 @@ Token scanToken(Scanner* scanner) {
 
     return errorToken(scanner, "Unexpected character");
 }
-
-
-
-
-

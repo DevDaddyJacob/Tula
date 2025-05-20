@@ -76,13 +76,13 @@ typedef struct {
  * \param[in]       scanner: Pointer of the scanner to initialize
  * \param[in]       source: Pointer to the first character on the first line
  */
-void initScanner(Scanner* scanner, const char* source);
+void tula_initScanner(Scanner* scanner, const char* source);
 
 /**
  * \brief           Walks the scanner scanning the next token
  * \param[in]       scanner: Pointer of the scanner to walk
  * \return          Returns the created token
  */
-Token scanToken(Scanner* scanner);
+Token tula_scanToken(Scanner* scanner);
 
 #endif /* tulac_scanner_h */

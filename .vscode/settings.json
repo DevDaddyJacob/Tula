@@ -1,0 +1,16 @@
+{
+    "editor.tabSize": 4,
+    "files.associations": {
+        "scanner.h": "c",
+        "compiler.h": "c",
+        "common.h": "c",
+        "stdio.h": "c",
+        "debug.h": "c",
+        "arrays.h": "c",
+        "array": "c",
+        "compare": "c",
+        "cstddef": "c",
+        "type_traits": "c",
+        "xutility": "c"
+    },
+}
