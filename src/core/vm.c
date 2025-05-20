@@ -65,6 +65,8 @@ static InterpretResult runVM(VM* vm) {
 #ifdef TULA_DEBUG
         /* Trace the stack */
         printf("%27s", "Stack: ");
+        if (vm->stack >= vm->stackTop) printf("<>");
+        
         for (Value* slot = vm->stack; slot < vm->stackTop; slot++) {
             printf("[ ");
             tula_printValue(*slot);
