@@ -48,9 +48,30 @@ typedef enum {
      */
     OP_DIVIDE,
     
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
     OP_NIL,
+    
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
     OP_TRUE,
+    
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
     OP_FALSE,
+
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
+    OP_NOT,
+
     OP_POP,
     OP_GET_LOCAL,
     OP_SET_LOCAL,
@@ -65,7 +86,6 @@ typedef enum {
     OP_EQUAL,
     OP_GREATER,
     OP_LESS,
-    OP_NOT,
     OP_PRINT,
     OP_JUMP,
     OP_JUMP_IF_FALSE,

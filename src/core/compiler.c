@@ -3,6 +3,7 @@
 
 #include "compiler.h"
 #include "scanner.h"
+#include "value.h"
 #include "../common.h"
 #include "../debug.h"
 #include "../utils/log.h"
@@ -111,6 +112,12 @@ static void binary();
 /**
  * TBD
  */
+static void literal();
+
+
+/**
+ * TBD
+ */
 static void number();
 
 
@@ -174,7 +181,7 @@ ParseRule rules[] = {
     [TOKEN_PLUS]            = {NULL,     binary, PREC_TERM},
     [TOKEN_SLASH]           = {NULL,     binary, PREC_FACTOR},
     [TOKEN_STAR]            = {NULL,     binary, PREC_FACTOR},
-    [TOKEN_BANG]            = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_BANG]            = {unary,    NULL,   PREC_NONE},
     [TOKEN_EQUAL]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_GREATER]         = {NULL,     NULL,   PREC_NONE},
     [TOKEN_LESS]            = {NULL,     NULL,   PREC_NONE},
@@ -195,9 +202,9 @@ ParseRule rules[] = {
     [TOKEN_SUPER]   = {NULL,     NULL,   PREC_NONE},
     [TOKEN_VAR]     = {NULL,     NULL,   PREC_NONE},
     [TOKEN_THIS]    = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_NIL]     = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_FALSE]   = {NULL,     NULL,   PREC_NONE},
-    [TOKEN_TRUE]    = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_NIL]     = {literal,  NULL,   PREC_NONE},
+    [TOKEN_FALSE]   = {literal,  NULL,   PREC_NONE},
+    [TOKEN_TRUE]    = {literal,  NULL,   PREC_NONE},
     [TOKEN_AND]     = {NULL,     NULL,   PREC_NONE},
     [TOKEN_OR]      = {NULL,     NULL,   PREC_NONE},
     [TOKEN_IF]      = {NULL,     NULL,   PREC_NONE},
@@ -288,12 +295,6 @@ static void grouping() {
 }
 
 
-static void number() {
-    double value = strtod(parser.previous.start, NULL);
-    emitConstant(value);
-}
-
-
 static void unary() {
     TokenType operatorType = parser.previous.type;
     
@@ -304,6 +305,7 @@ static void unary() {
 
     /* Emit the operator instruction */
     switch (operatorType) {
+        case TOKEN_BANG: emitByte(OP_NOT); break;
         case TOKEN_MINUS: emitByte(OP_NEGATE); break;
         default: return; /* Unreachable */
     }
@@ -322,6 +324,22 @@ static void binary() {
         case TOKEN_SLASH: emitByte(OP_DIVIDE); break;
         default: return; /* Unreachable */
     }
+}
+
+
+static void literal() {
+    switch (parser.previous.type) {
+        case TOKEN_FALSE: emitByte(OP_FALSE); break;
+        case TOKEN_NIL: emitByte(OP_NIL); break;
+        case TOKEN_TRUE: emitByte(OP_TRUE); break;
+        default: return; /* Unreachable */
+    }
+}
+
+
+static void number() {
+    double value = strtod(parser.previous.start, NULL);
+    emitConstant(NUMBER_VAL(value));
 }
 
 
@@ -395,19 +413,6 @@ BOOL tula_compile(const char* source, Chunk* chunk) {
 
 
     /* Walk the scanner */
-    // int line = -1;
-    // for (;;) {
-    //     Token token = scanToken(&scanner);
-    //     if (token.line != line) {
-    //       printf("%4d ", token.line);
-    //       line = token.line;
-    //     } else {
-    //       printf("   | ");
-    //     }
-    //     printf("%2d '%.*s'\n", token.type, token.length, token.start); 
-    
-    //     if (token.type == TOKEN_EOF) break;
-    // }
     advance();
     expression();
     consume(TOKEN_EOF, "Expected end of expression.");

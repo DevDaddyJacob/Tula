@@ -3,7 +3,36 @@
 
 #include "../common.h"
 
-typedef double Value;
+
+#define IS_TYPE(value, _type) ((value).type == _type)
+#define IS_BOOL(value)      IS_TYPE(value, VAL_BOOL)
+#define IS_NIL(value)       IS_TYPE(value, VAL_NIL)
+#define IS_NUMBER(value)    IS_TYPE(value, VAL_NUMBER)
+
+#define AS_VAL(value, field) ((value).as.field)
+#define AS_BOOL(value)      AS_VAL(value, boolean)
+#define AS_NUMBER(value)    AS_VAL(value, number)
+
+#define CAST_VAL(_type, field, value) ((Value){ _type, { .field = value } })
+#define BOOL_VAL(value)     CAST_VAL(VAL_BOOL, boolean, value)
+#define NIL_VAL             CAST_VAL(VAL_NIL, number, 0)
+#define NUMBER_VAL(value)   CAST_VAL(VAL_NUMBER, number, value)
+
+
+typedef enum {
+    VAL_BOOL,
+    VAL_NIL,
+    VAL_NUMBER,
+} ValueType;
+
+
+typedef struct {
+    ValueType type;         /** The type of the value */
+    union {
+        BOOL boolean;
+        double number;
+    } as;                   /** Tagged union for the value payload */
+} Value;
 
 
 typedef struct {

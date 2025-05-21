@@ -78,10 +78,11 @@ const char* OpCodes[] = {
     "OP_SUBTRACT",
     "OP_MULTIPLY",
     "OP_DIVIDE",
-
     "OP_NIL",
     "OP_TRUE",
     "OP_FALSE",
+    "OP_NOT",
+
     "OP_POP",
     "OP_GET_LOCAL",
     "OP_SET_LOCAL",
@@ -96,7 +97,6 @@ const char* OpCodes[] = {
     "OP_EQUAL",
     "OP_GREATER",
     "OP_LESS",
-    "OP_NOT",
     "OP_PRINT",
     "OP_JUMP",
     "OP_JUMP_IF_FALSE",
@@ -164,6 +164,10 @@ int tula_disassembleInstruction(Chunk* chunk, int offset) {
         case OP_SUBTRACT:
         case OP_MULTIPLY:
         case OP_DIVIDE:
+        case OP_NIL:
+        case OP_TRUE:
+        case OP_FALSE:
+        case OP_NOT:
             return simpleInstruction(OpCodes[instruction], offset);
             
         case OP_CONSTANT:
@@ -214,7 +218,22 @@ void tula_disassembleChunk(Chunk* chunk, const char* name) {
 
 void tula_printValue(Value value) {
 #ifdef TULA_DEBUG
-    printf("%g", value);
+    switch (value.type) {
+        case VAL_BOOL: {
+            printf(AS_BOOL(value) ? "true" : "false");
+            break;
+        }
+        
+        case VAL_NIL: {
+            printf("nil");
+            break;
+        }
+        
+        case VAL_NUMBER: {
+            printf("%g", AS_NUMBER(value));
+            break;
+        }
+    }
 #endif /* TULA_DEBUG */
 }
 

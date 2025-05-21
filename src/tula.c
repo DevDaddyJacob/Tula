@@ -87,6 +87,7 @@ static void debug() {
     tula_initVM(&vm);
     tula_initChunk(&chunk);
 
+    /*
     int constantIndex = tula_addChunkConstant(&chunk, 1.2);
     tula_writeChunk(&chunk, OP_CONSTANT, 123);
     tula_writeChunk(&chunk, constantIndex, 123);
@@ -103,7 +104,8 @@ static void debug() {
   
     tula_writeChunk(&chunk, OP_DIVIDE, 123);
     tula_writeChunk(&chunk, OP_NEGATE, 123);
-  
+    */
+
     tula_writeChunk(&chunk, OP_RETURN, 123);
     
     tula_interpretChunk(&vm, &chunk);

@@ -11,6 +11,9 @@
         "compare": "c",
         "cstddef": "c",
         "type_traits": "c",
-        "xutility": "c"
+        "xutility": "c",
+        "stdbool.h": "c",
+        "utility": "c",
+        "xtr1common": "c"
     },
 }
