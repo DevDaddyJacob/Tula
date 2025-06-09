@@ -1,146 +1,137 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cli.h"
-#include "conf.h"
+#include "tula.h"
 #include "common.h"
-#include "debug.h"
-#include "core/scanner.h"
-#include "core/chunk.h"
-#include "core/vm.h"
-#include "utils/log.h"
+#include "cli.h"
+
+/*
+ * ==================================================
+ * Macros
+ * ==================================================
+ */
+
+#if !defined(TULA_PROGRAM_NAME)
+    #define TULA_PROGRAM_NAME "tula"
+#endif
 
 
-int EXIT_CODE = 0;
-TulaState TULA_STATE;
+/*
+ * ==================================================
+ * Typedefs & Prototypes
+ * ==================================================
+ */
 
-static char* readFile(const char* path) {
-    FILE* file = fopen(path, "rb");
-    if (file == NULL) {
-        tula_printfErr("Could not open file \"%s\".\n", path);
-        exit(74);
-    }
-  
+static void repl_run();
+
+static char* repl_read();
+
+static char* repl_eval(char* line);
+
+static void repl_print(char* output);
+
+
+/*
+ * ==================================================
+ * Module Level Variables & Constants
+ * ==================================================
+ */
+
+const char* PROG_NAME = TULA_PROGRAM_NAME;
+
+
+/*
+ * ==================================================
+ * Function Definitions
+ * ==================================================
+ */
+
+static void repl_run() {
+    char* line;
+
+    /* Initialize variables */
+    line = NULL;
+
     
-    fseek(file, 0L, SEEK_END);
-    size_t fileSize = ftell(file);
-    rewind(file);
-  
+    /* Run loop */
+    for (;;) {
+        /* Read */
+        line = repl_read();
+        if (line == NULL) continue;
 
-    char* buffer = (char*)malloc(fileSize + 1);
+
+        /* Eval */
+        line = repl_eval(line);
+
+
+        /* Print */
+        repl_print(line);
+
+        free(line);
+        line = NULL;
+    }
+}
+
+static char* repl_read() {
+    int readSuccessful, lineLength;
+    char* buffer;
+    
+    /* Allocate the buffer */
+    buffer = (char*)malloc(sizeof(char) * TULA_MAX_INPUT);
     if (buffer == NULL) {
-        tula_printfErr("Not enough memory to read \"%s\".\n", path);
-        exit(74);
+        tula_errPrintFatal("Failed to allocate memory");
+        exit(TULA_EXIT_NO_MEM);
     }
 
-    size_t bytesRead = fread(buffer, sizeof(char), fileSize, file);
-    if (bytesRead < fileSize) {
-        tula_printfErr("Could not read file \"%s\".\n", path);
-        exit(74);
+
+    /* Prompt for and scan input */
+    fputs("> ", stdout);
+    fflush(stdout);
+    readSuccessful = fgets(buffer, TULA_MAX_INPUT, stdin) != NULL;
+    if (readSuccessful == FALSE) {
+        free(buffer);
+        return NULL;
     }
 
-    buffer[bytesRead] = '\0';
-  
 
-    fclose(file);
+    /* Ensure the string has a line terminator */
+    lineLength = strlen(buffer);
+    if (lineLength > 0 && buffer[lineLength - 1] == '\n') {
+        buffer[--lineLength] = '\0';
+    }
+
     return buffer;
 }
 
-static void repl() {
-    Scanner scanner;
-    Token token;
-
-    char line[1024];
-    for (;;) {
-        printf("> ");
-
-        if (!fgets(line, sizeof(line), stdin)) {
-            printf("\n");
-            break;
-        }
-
-        tula_initScanner(&scanner, line);
-        
-        do {
-            token = tula_scanToken(&scanner);
-            tula_printToken(&token);
-        } while (token.type != TOKEN_EOF);
-    }
+static char* repl_eval(char* line) {
+    return line;
 }
 
-static void executeFile(const char* path) {
-    VM vm;
-    tula_initVM(&vm);
-
-    char* source = readFile(path);
-    InterpretResult result = tula_interpretSource(&vm, source);
-    free(source); 
-  
-    if (result == INTERPRET_COMPILE_ERROR) exit(65);
-    if (result == INTERPRET_RUNTIME_ERROR) exit(70);
+static void repl_print(char* output) {
+    fputs(output, stdout);
+    fputs("\n", stdout);
+    fflush(stdout);
 }
-
-static void debug() {
-    VM vm;
-    Chunk chunk;
-
-    tula_initVM(&vm);
-    tula_initChunk(&chunk);
-
-    /*
-    int constantIndex = tula_addChunkConstant(&chunk, 1.2);
-    tula_writeChunk(&chunk, OP_CONSTANT, 123);
-    tula_writeChunk(&chunk, constantIndex, 123);
-  
-    constantIndex = tula_addChunkConstant(&chunk, 3.4);
-    tula_writeChunk(&chunk, OP_CONSTANT, 123);
-    tula_writeChunk(&chunk, constantIndex, 123);
-  
-    tula_writeChunk(&chunk, OP_ADD, 123);
-  
-    constantIndex = tula_addChunkConstant(&chunk, 5.6);
-    tula_writeChunk(&chunk, OP_CONSTANT, 123);
-    tula_writeChunk(&chunk, constantIndex, 123);
-  
-    tula_writeChunk(&chunk, OP_DIVIDE, 123);
-    tula_writeChunk(&chunk, OP_NEGATE, 123);
-    */
-
-    tula_writeChunk(&chunk, OP_RETURN, 123);
-    
-    tula_interpretChunk(&vm, &chunk);
-
-    // return -((1.2 + 3.4) / 5.6)
-
-    tula_freeChunk(&chunk);
-    tula_freeVM(&vm);
-}
-
 
 int main(int argc, const char* argv[]) {
-    tula_parseCliArgs(argc, argv, &TULA_STATE);
-    printf(
-        "TulaState={helpMenu:%d,interactive:%d,helpItem:\"%s\",scriptFile:\"%s\"}\n",
-        TULA_STATE.helpMenu,
-        TULA_STATE.interactive,
-        TULA_STATE.helpItem,
-        TULA_STATE.scriptFile
-    );
+    CliConfig* cli;
 
-    if (TULA_STATE.interactive) {
-        repl();
+    /* Initialize variables */
+    cli = NULL;
 
-    } else if (TULA_STATE.scriptFile != NULL) {
-        executeFile(TULA_STATE.scriptFile);
 
-    } else if (TULA_STATE.helpMenu) {
-        printf("Help menu");
-
-    } else {
-        tula_printfErr("Improper usage");
-        EXIT_CODE = 1;
+    /* Parse the command line arguments */
+    cli = tula_parseCliArgs(argc, argv);
+    if (cli == NULL) {
+        tula_errPrintFatal("Failed to allocate memory");
+        exit(TULA_EXIT_NO_MEM);
     }
 
-    tula_freeState(&TULA_STATE);
-    return EXIT_CODE;
+
+    /* Determine what we are running based on cli args */
+    if (cli->interactive == TRUE) {
+        repl_run();
+    }
+
+    return TULA_EXIT_GODD;
 }

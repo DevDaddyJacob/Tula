@@ -1,37 +1,105 @@
-#ifndef tulac_conf_h
-#define tulac_conf_h
+#ifndef tula_conf_h
+#define tula_conf_h
 
 /*
  * ============================================================================
- * Configure and define the build mode macros and tools
+ * Development debugging config
  * ============================================================================
  */
 
-#ifndef TULA_BUILD
-    #warning "TULA_BUILD is not specified, defaulting to 0 (debug)"
-    #define BUILD_MODE 0
-#elif TULA_BUILD == 0
-    #define BUILD_MODE 0
-#elif TULA_BUILD == 1
-    #define BUILD_MODE 1
-#else
-    #error "TULA_BUILD is assigned an invalid value, must be 0 for debug, or 1 for release"
-#endif
-
-#if BUILD_MODE == 0
-    #define TULA_DEBUG
-#endif
-
-#define IS_DEBUG_ENABLED (BUILD_MODE == 0)
+/**
+ * Used manually if you want to have some extra debugging output, mainly for
+ * development work
+ */
+#define TULA_DEBUGGING
 
 /* ========================================================================= */
+
+
+/*
+ * ============================================================================
+ * Configure the C standard and OS
+ * ============================================================================
+ */
+
+#if defined(TULA_OS_WINDOWS)
+    #define _TULA_OS_DEF
+#endif
+
+
+#if defined(TULA_OS_MAC)
+    #define _TULA_OS_DEF
+#endif
+
+
+#if defined(TULA_OS_LINUX)
+    #define _TULA_OS_DEF
+#endif
+
+
+#if defined(TULA_OS_UNIX)
+    #define _TULA_OS_DEF
+#endif
+
+
+#if !defined(_TULA_OS_DEF)
+    #if defined(_WIN32) || defined(_WIN64)
+        #define TULA_OS_WINDOWS
+        #define _TULA_OS_DEF
+    
+    #elif defined(__APPLE__) && defined(__MACH__)
+        #define TULA_OS_MAC
+        #define _TULA_OS_DEF
+    
+    #elif defined(__linux__)
+        #define TULA_OS_LINUX
+        #define _TULA_OS_DEF
+
+    #elif defined(__unix__)
+        #define TULA_OS_UNIX
+        #define _TULA_OS_DEF
+    
+    #else
+        #error "Unknown or unsupported platform"
+    #endif
+#endif
+
+
+
+/*
+ * Specifies the C standard being used.
+ * Defaults to C89
+ *
+ * Usage:
+ *      -DCSTD=89 
+ *      -DCSTD=99 
+ *      -DCSTD=80 
+ */
+#if defined(CSTD) && CSTD == 89
+    #define TULA_STD_C89
+#elif defined(CSTD) && CSTD == 90
+    #define TULA_STD_C90
+#elif defined(CSTD) && CSTD == 99
+    #define TULA_STD_C99
+#else
+    #define TULA_STD_C89
+#endif
+
+
+#define TULA_IS_INT_32 ((UINT_MAX >> 30) >=3)
+
+/* ========================================================================= */
+
 
 /**
  * The number by which array sizes is multiplied by when increasing their size
  * For example, if an array has 16 elements, and we are wanting to increase the 
  * size, we will multiply 16 by the value of TULA_ARRAY_GROW_FACTOR
+ * 
+ * Usage
  */
 #define TULA_ARRAY_GROW_FACTOR 2
+
 
 /**
  * The minimum array size. If we have an minimum of 8 and an array of size 3 
@@ -41,9 +109,16 @@
  */
 #define TULA_ARRAY_MIN_THRESHOLD 8
 
+
 /**
  * The maximum size the stack can get
  */
 #define TULA_STACK_MAX 256
 
-#endif /* tulac_conf_h */
+
+/**
+ * When in REPL / interactive mode this is the size of the buffer to use
+ */
+#define TULA_MAX_INPUT 512
+
+#endif /* tula_conf_h */

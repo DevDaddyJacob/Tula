@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "cli.h"
-#include "debug.h"
-#include "./utils/log.h"
+#include "common.h"
+#include "tula.h"
 
 /*
  * ==================================================
@@ -12,34 +12,32 @@
  * ==================================================
  */
 
-typedef enum {
-    PARSE_OK,
-    PARSE_STOP,
-    PARSE_ERROR_UNKNOWN,
-    PARSE_ERROR_BAD_OPTION,
-    PARSE_ERROR_BAD_USE,
-} ParseResult;
+typedef struct {
+    int pointer;
+    int argc;
+    const char** argv;
+} CliParams;
 
 typedef enum {
-    OPTION_INVALID,
-    OPTION_END_OF_OPTS,
-    OPTION_INTERACTIVE,
-    OPTION_HELP,
-    OPTION_SCRIPT_FILE
-} CliOptions;
+    OPTION_UNKNOWN,         /** Not an option */
+    OPTION_INVALID,         /** Invalid option */
+    OPTION_END_OF_OPTIONS,  /** -- or --end-of-options */
+    OPTION_HELP,            /** -h or --help */
+    OPTION_VERSION,         /** -v or --version */
+    OPTION_INTERACTIVE      /** -i or --interactive */
+} OptionType;
 
+static void printHelpMenu();
 
-static BOOL strprefix(const char* str, const char* pre);
+static BOOL hasNext(CliParams* params);
 
-static void initState(TulaState* state);
+static char* peekArgument(CliParams* params);
 
-static CliOptions checkArg(
-    const char* arg,
-    const char* match,
-    CliOptions option
-);
+static char* consumeArgument(CliParams* params);
 
-static CliOptions parseArg(TulaState* state, const char* arg);
+static OptionType parseOptionType(const char* arg);
+
+static BOOL consumeNext(CliParams* params, CliConfig* config);
 
 
 /*
@@ -48,7 +46,6 @@ static CliOptions parseArg(TulaState* state, const char* arg);
  * ==================================================
  */
 
-char* PROGRAM_NAME;
 
 
 /*
@@ -57,124 +54,154 @@ char* PROGRAM_NAME;
  * ==================================================
  */
 
-static BOOL strprefix(const char* str, const char* pre) {
-    if (strncmp(pre, str, strlen(pre)) == 0) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
+static void printHelpMenu() {
+#define RIGHT_PAD_WIDTH 25
+
+    /* Print the usage */
+    fprintf(
+        stdout,
+        "Usage: %s [OPTIONS] [FILE]\n\n" \
+        "Options:\n" \
+        "\t%-*s indicates the end of the options\n" \
+        "\t%-*s prints this menu\n" \
+        "\t%-*s prints the version of the program\n" \
+        "\t%-*s enters the REPL mode (Read-Evaluate-Print-Loop)\n",
+
+        PROG_NAME,
+        RIGHT_PAD_WIDTH, "--, --end-of-options",
+        RIGHT_PAD_WIDTH, "-h, --help",
+        RIGHT_PAD_WIDTH, "-v, --version",
+        RIGHT_PAD_WIDTH, "-i, --interactive"
+    );
+
+#undef RIGHT_PAD_WIDTH
+    exit(TULA_EXIT_GODD);
+}
+
+static BOOL hasNext(CliParams* params) {
+    if (params->pointer >= params->argc) return FALSE;
+    return TRUE;
+}
+
+static char* peekArgument(CliParams* params) {
+    if (!hasNext(params)) return NULL;
+    return params->argv[params->pointer];
 }
 
 
-static void initState(TulaState* state) {
-    state = malloc(sizeof(TulaState));
-
-    /* Set the flags */
-    state->helpMenu = FALSE;
-    state->interactive = FALSE;
-
-    /* Set the options */
-    state->helpItem = NULL;
-    state->scriptFile = NULL;
+static char* consumeArgument(CliParams* params) {
+    if (!hasNext(params)) return NULL;
+    return params->argv[params->pointer++];
 }
 
 
-static CliOptions checkArg(
-    const char* arg,
-    const char* match,
-    CliOptions option
-) {
-    if (strprefix(arg, match)) {
-        return option;
-    }
-
-    return OPTION_INVALID;
-}
-
-
-static CliOptions parseArg(TulaState* state, const char* arg) {
-    printf("ParseArg: %s\n", arg);
-    if (strlen(arg) <= 1 || arg[0] != '-') return OPTION_INVALID;
-
+static OptionType parseOptionType(const char* arg) {
+    if (arg[0] != '-' || strlen(arg) < 2) return OPTION_UNKNOWN;
 
     switch (arg[1]) {
-        case 'h': return checkArg(arg, "-h", OPTION_HELP);
-        case 's': return checkArg(arg, "-s", OPTION_SCRIPT_FILE);
-        case 'I': return checkArg(arg, "-I", OPTION_INTERACTIVE);
-
         case '-': {
-            if (strlen(arg) == 2) return OPTION_END_OF_OPTS;
+            if (strlen(arg) == 2) return OPTION_END_OF_OPTIONS;
+
             switch (arg[2]) {
-                case 'h': return checkArg(arg, "--help", OPTION_HELP);
-                default: break;
-            }
-            break;
-        }
-
-        default: break;
-    }
-
-    return OPTION_INVALID;
-}
-
-
-void tula_freeState(TulaState* state) {
-    free(state);
-    state = NULL;
-}
-
-
-void tula_parseCliArgs(int argc, const char* argv[], TulaState* state) {
-    initState(state);
-
-    PROGRAM_NAME = argv[0];
-
-    /* Handle no args */
-    if (argc == 1) {
-        if (IS_DEBUG_ENABLED) {
-            state ->interactive = TRUE;
-        } else {
-            state->helpMenu = TRUE;
-        }
-
-        return;
-    }
-
-
-    /* If only 1 argument is provided, check if it can be assumed as the file */
-    if (argc == 2 && argv[1][0] != '-') {
-        state->scriptFile = argv[1];
-        return;
-    }
-
-
-    /* Parse the command line args */
-    CliOptions option;
-    for (int i = 1; i < argc; i++) {
-        switch (option = parseArg(state, argv[i])) {
-            case OPTION_END_OF_OPTS: break;
-            
-            case OPTION_HELP: {
-                state->helpMenu = TRUE;
-                if (
-                    i + 1 < argc 
-                    && parseArg(state, argv[i + 1]) == OPTION_INVALID
-                ) {
-                    state->helpItem = argv[i + 1];
-                    i++;
+                default: {
+#define ARG_EQ(str) STR_EQ(arg, str)
+                    if (ARG_EQ("--end-of-options")) {
+                        return OPTION_END_OF_OPTIONS;
+                    } else if (ARG_EQ("--help")) {
+                        return OPTION_HELP;
+                    } else if (ARG_EQ("--version")) {
+                        return OPTION_VERSION;
+                    } else if (ARG_EQ("--interactive")) {
+                        return OPTION_INTERACTIVE;
+                    } else {
+                        return OPTION_INVALID;
+                    }
+#undef ARG_EQ
                 }
-                break;
-            }
-
-            case OPTION_INVALID:
-            default: {
-                tula_printfErr(
-                    "bad option '%s'\n",
-                    argv[i]
-                );
-                exit(1);
-                return;
             }
         }
+
+        case 'h': return OPTION_HELP;
+        case 'v': return OPTION_VERSION;
+        case 'i': return OPTION_INTERACTIVE;
+        default: return OPTION_INVALID;
     }
+}
+
+
+static BOOL consumeNext(CliParams* params, CliConfig* config) {
+    if (!hasNext(params)) return FALSE;
+
+    switch (parseOptionType(peekArgument(params))) {
+        case OPTION_UNKNOWN: {
+            return FALSE;
+        }
+
+        case OPTION_END_OF_OPTIONS: {
+            consumeArgument(params);
+            return FALSE;
+        }
+
+        case OPTION_INVALID: {
+            tula_errPrint(
+                "invalid option: use 'tula --help' for more information"
+            );
+
+            exit(TULA_EXIT_BAD_USAGE);
+            return FALSE; /* Unreachable */
+        }
+
+        case OPTION_HELP: {
+            consumeArgument(params);
+            printHelpMenu();
+            return FALSE;
+        }
+
+        case OPTION_VERSION: {
+            consumeArgument(params);
+            printf(TULA_RELEASE);
+
+            return FALSE;
+        }
+
+        case OPTION_INTERACTIVE: {
+            consumeArgument(params);
+            config->interactive = TRUE;
+            return TRUE;
+        }
+    }
+
+    return TRUE; /* Unreachable? */
+}
+
+
+CliConfig* tula_parseCliArgs(int argc, const char** argv) {
+    CliConfig* config;
+    CliParams* params;
+    int i;
+    
+    /* Allocate memory for params & config */
+    params = (CliParams*)malloc(sizeof(CliParams));
+    if (params == NULL) {
+        tula_errPrintFatal("Failed to allocate memory");
+        exit(TULA_EXIT_NO_MEM);
+    }
+
+    config = (CliConfig*)malloc(sizeof(CliConfig));
+    if (config == NULL) {
+        tula_errPrintFatal("Failed to allocate memory");
+        exit(TULA_EXIT_NO_MEM);
+    }
+
+    
+    /* Initialize the params */
+    params->pointer = 1;
+    params->argc = argc;
+    params->argv = argv;
+
+
+    /* Consume the arguments */
+    while (consumeNext(params, config));
+
+    return config;
 }

@@ -1,22 +1,95 @@
-#ifndef tulac_common_h
-#define tulac_common_h
+#ifndef tula_common_h
+#define tula_common_h
 
-#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "conf.h"
+#include "tula.h"
+#include "utils/uint64.h"
 
 
-#ifndef TRUE
+/*
+ * ============================================================================
+ * Define some shorthands to make interacting with numbers a bit better
+ * ============================================================================
+ */
+
+#define TULA_IS_32BIT_INT ((UINT_MAX >> 30) >= 3)
+
+typedef signed char     Int8;
+typedef unsigned char   UInt8;
+
+typedef signed int      Int16;
+typedef unsigned int    UInt16;
+
+typedef signed long     Int32;
+typedef unsigned long   UInt32;
+
+/* ========================================================================= */
+
+
+/*
+ * ============================================================================
+ * Just here to add some consistiency and readability for boolean-treated ints
+ * ============================================================================
+ */
+
+#define BOOL UInt8
 #define TRUE 1
-#endif /* TRUE */
-
-
-#ifndef FALSE
 #define FALSE 0
-#endif /* FALSE */
+
+/* ========================================================================= */
 
 
-#ifndef BOOL
-#define BOOL uint8_t
-#endif /* BOOL */
+/*
+ * ============================================================================
+ * Program possible exit codes
+ * ============================================================================
+ */
+
+#define TULA_EXIT_GODD 0
+
+#define TULA_EXIT_BAD_USAGE 1
+
+#define TULA_EXIT_NO_MEM 2
 
 
-#endif /* tulac_common_h */
+/* ========================================================================= */
+
+
+/*
+ * ============================================================================
+ * Console writting tools (Lua inspired)
+ * ============================================================================
+ */
+
+#if !defined(tula_errPrint)
+    #define tula_errPrint(msg) \
+        (fprintf(stderr, "tula: Error: %s\n", (msg)), fflush(stderr))
+#endif
+
+#if !defined(tula_errPrintFatal)
+    #define tula_errPrintFatal(msg) \
+        (fprintf(stderr, "tula: Fatal Error: %s\n", (msg)), fflush(stderr))
+#endif
+
+
+/* ========================================================================= */
+
+
+/*
+ * ============================================================================
+ * Some simple misc utilities
+ * ============================================================================
+ */
+
+#if !defined(STR_EQ)
+    #define STR_EQ(strA, strB) \
+        (strcmp(strA, strB) == 0)
+#endif
+
+/* ========================================================================= */
+
+
+#endif /* tula_common_h */

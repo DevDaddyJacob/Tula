@@ -1,88 +1,91 @@
-NAME := tulac
+# ===== USER SETTINGS =========================================================
 
-SOURCE_DIR := src
-BINARY_DIR := bin
-OBJECT_DIR := obj
-EXE := $(BINARY_DIR)/$(NAME)
+PLATFORM = guess
 
+C_STANDARD = 89
 
-CC := gcc
-CFLAGS := -std=c99 							# Conform to the ISO 1999 C standard
-CFLAGS += -Wall	 							# Enable most warning messages
-CFLAGS += -Wextra							# Print extra (possibly unwanted) warnings
+CC = gcc
+CFLAGS = -Wall -Wextra -pedantic $(SYSCFLAGS)
 
-CFLAGS += -Wno-declaration-after-statement	# Ignored warnings when a declaration is found after a statement.
+UNAME = uname
 
-CFLAGS += -Werror=undef						# Error if an undefined macro is used in an #if directive.
-CFLAGS += -Werror=shadow					# Error when one variable shadows another.
-CFLAGS += -Werror=div-by-zero				# Error about compile-time integer division by zero.
-
-CFLAGS += -Waggressive-loop-optimizations	# Warn if a loop with constant number of iterations triggers undefined behavior.
-
-ifeq ($(TULA_MODE),DEBUG)
-	CFLAGS += -DTULA_BUILD=0
-
-	CFLAGS += -Wno-error=unused-but-set-parameter	  	# Warn when a function parameter is only set, otherwise unused
-	CFLAGS += -Wno-error=unused-but-set-variable	  	# Warn when a variable is only set, otherwise unused.
-	CFLAGS += -Wno-error=unused-const-variable	      	# Warn when a const variable is unused.
-	CFLAGS += -Wno-error=unused-function	           	# Warn when a function is unused.
-	CFLAGS += -Wno-error=unused-label	              	# Warn when a label is unused.
-	CFLAGS += -Wno-error=unused-local-typedefs	     	# Warn when typedefs locally defined in a function are not used.
-	CFLAGS += -Wno-error=unused-macros	             	# Warn about macros defined in the main file that are not used.
-	CFLAGS += -Wno-error=unused-parameter	          	# Warn when a function parameter is unused.
-	CFLAGS += -Wno-error=unused-value	              	# Warn when an expression value is unused.
-	CFLAGS += -Wno-error=unused-variable	           	# Warn when a variable is unused.
-	CFLAGS += -Wno-error=logical-op						# Warn when a logical operator is suspiciously always evaluating to true or false.
-	CFLAGS += -Wno-error=absolute-value					# Warn on suspicious calls of standard functions computing absolute values.
-	
-endif
-
-ifeq ($(TULA_MODE),RELEASE)
-	CFLAGS += -DTULA_BUILD=1
-	CFLAGS += -Werror						# Treat all warnings as errors
-	
-	CFLAGS += -Werror=unused-but-set-parameter	  	# Error when a function parameter is only set, otherwise unused
-	CFLAGS += -Werror=unused-but-set-variable	  	# Error when a variable is only set, otherwise unused.
-	CFLAGS += -Werror=unused-const-variable	      	# Error when a const variable is unused.
-	CFLAGS += -Werror=unused-function	           	# Error when a function is unused.
-	CFLAGS += -Werror=unused-label	              	# Error when a label is unused.
-	CFLAGS += -Werror=unused-local-typedefs	     	# Error when typedefs locally defined in a function are not used.
-	CFLAGS += -Werror=unused-macros	             	# Error about macros defined in the main file that are not used.
-	CFLAGS += -Werror=unused-parameter	          	# Error when a function parameter is unused.
-	CFLAGS += -Werror=unused-value	              	# Error when an expression value is unused.
-	CFLAGS += -Werror=unused-variable	           	# Error when a variable is unused.
-	CFLAGS += -Werror=logical-op					# Error when a logical operator is suspiciously always evaluating to true or false.
-	CFLAGS += -Werror=absolute-value				# Error on suspicious calls of standard functions computing absolute values.
-endif
+RM = rm -rf
+MKDIR = mkdir -p
 
 
-# Files
-SOURCES := $(wildcard $(SOURCE_DIR)/*.c) $(wildcard $(SOURCE_DIR)/**/*.c)
-HEADERS := $(wildcard $(SOURCE_DIR)/*.h) $(wildcard $(SOURCE_DIR)/**/*.h)
-OBJECTS := $(addprefix $(OBJECT_DIR)/, $(subst $(SOURCE_DIR)/, , $(SOURCES:%.c=%.o)))
+# ===== MAKE VARS =============================================================
+
+OUTPUT_NAME = tulac
+
+PLATFORMS = guess windows macosx linux
+CSTD = c$(C_STANDARD)
+
+SOURCE_DIR = src
+BINARY_DIR = bin
+OBJECT_DIR = obj
+
+SOURCES = $(wildcard $(SOURCE_DIR)/*.c) $(wildcard $(SOURCE_DIR)/**/*.c)
+HEADERS = $(wildcard $(SOURCE_DIR)/*.h) $(wildcard $(SOURCE_DIR)/**/*.h)
+OBJECTS = $(addprefix $(OBJECT_DIR)/, $(subst $(SOURCE_DIR)/, , $(SOURCES:%.c=%.o)))
+
+OUTPUT_FILE = $(BINARY_DIR)/$(OUTPUT_NAME)
+
+ALL = all
+
+# ===== TARGETS ===============================================================
+
+default: $(PLATFORM)
+
+echo:
+	@ echo "MAKE = $(MAKE)"
+	@ echo "UNAME = $(UNAME)"
+	@ echo "PLATFORM = $(PLATFORM)"
+	@ echo "PLATFORMS = $(PLATFORMS)"
+	@ echo "RM = $(RM)"
+	@ echo "MKDIR = $(MKDIR)"
+	@ echo "C_STANDARD = $(C_STANDARD)"
+	@ echo "CSTD = $(CSTD)"
+	@ echo "CC = $(CC)"
 
 
-# Targets ---------------------------------------------------------------------
+all: clean $(OUTPUT_FILE)
 
-default: all
-
-all: clean $(EXE)
-
-build: $(EXE)
 
 # Remove all of the build files
 clean:
-	@ rm -rf $(BINARY_DIR)
-	@ rm -rf $(OBJECT_DIR)
+	@ $(RM) $(BINARY_DIR)
+	@ $(RM) $(OBJECT_DIR)
+
 
 # Link the interpreter.
-$(EXE): $(OBJECTS)
+$(OUTPUT_FILE): $(OBJECTS)
 	@ echo "*" $(CC) -o $@ $(OBJECTS) $(CFLAGS)
-	@ mkdir -p "./$(BINARY_DIR)"
+	@ $(MKDIR) "./$(BINARY_DIR)"
 	@ $(CC) -o $@ $(OBJECTS) $(CFLAGS)
+
 
 # Compile object files.
 $(OBJECT_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
 	@ echo "*" $(CC) -c -o $@ $< $(CFLAGS)
-	@ mkdir -p $(addprefix ./, $(dir $(OBJECTS)))
+	@ $(MKDIR) $(addprefix ./, $(dir $(OBJECTS)))
 	@ $(CC) -c -o $@ $< $(CFLAGS)
+
+
+guess:
+	@ echo "*" Guessing `$(UNAME)`
+	@ $(MAKE) `$(UNAME)`
+
+
+CYGWIN_NT-10.0-22631 windows:
+	@ echo "*" $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS SYSCFLAGS+=-DCSTD=89
+	@ $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS SYSCFLAGS+=-DCSTD=89
+
+
+Darwin macos macosx:
+	@ echo "*" $(MAKE) $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_MAC"
+	@ $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_MAC"
+
+
+Linux linux:
+	@ echo "*" $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_LINUX"
+	@ $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_LINUX"
