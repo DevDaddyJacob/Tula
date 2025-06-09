@@ -31,9 +31,9 @@ static void printHelpMenu();
 
 static BOOL hasNext(CliParams* params);
 
-static char* peekArgument(CliParams* params);
+static const char* peekArgument(CliParams* params);
 
-static char* consumeArgument(CliParams* params);
+static const char* consumeArgument(CliParams* params);
 
 static OptionType parseOptionType(const char* arg);
 
@@ -83,13 +83,13 @@ static BOOL hasNext(CliParams* params) {
     return TRUE;
 }
 
-static char* peekArgument(CliParams* params) {
+static const char* peekArgument(CliParams* params) {
     if (!hasNext(params)) return NULL;
     return params->argv[params->pointer];
 }
 
 
-static char* consumeArgument(CliParams* params) {
+static const char* consumeArgument(CliParams* params) {
     if (!hasNext(params)) return NULL;
     return params->argv[params->pointer++];
 }
@@ -178,7 +178,6 @@ static BOOL consumeNext(CliParams* params, CliConfig* config) {
 CliConfig* tula_parseCliArgs(int argc, const char** argv) {
     CliConfig* config;
     CliParams* params;
-    int i;
     
     /* Allocate memory for params & config */
     params = (CliParams*)malloc(sizeof(CliParams));
