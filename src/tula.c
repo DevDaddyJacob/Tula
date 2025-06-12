@@ -3,7 +3,9 @@
 
 #include "tula.h"
 #include "common.h"
-#include "cli.h"
+#include "core/lexer.h"
+#include "utils/cli.h"
+#include "utils/io.h"
 
 /*
  * ==================================================
@@ -113,6 +115,63 @@ static void repl_print(char* output) {
     fflush(stdout);
 }
 
+static void test(const char* path) {
+    int i;
+    FILE* file;
+    size_t fileSize;
+    char* buffer;
+    size_t bytesRead;
+    Lexer* lexer;
+    Token token;
+
+
+    file = fopen(path, "rb");
+    if (file == NULL) {
+        tula_errPrintFatal("Could not open file.");
+        exit(74);
+    }
+  
+    
+    fseek(file, 0L, SEEK_END);
+    fileSize = ftell(file);
+    rewind(file);
+  
+
+    buffer = (char*)malloc(fileSize + 1);
+    if (buffer == NULL) {
+        tula_errPrintFatal("Not enough memory to read");
+        exit(74);
+    }
+
+    bytesRead = fread(buffer, sizeof(char), fileSize, file);
+    if (bytesRead < fileSize) {
+        tula_errPrintFatal("Could not read file");
+        exit(74);
+    }
+
+    buffer[bytesRead] = '\0';
+  
+    fclose(file);
+
+    lexer = tulaLex_new(buffer);
+    do {
+        token = tulaLex_nextToken(lexer);
+        printf(
+            "Token{type:%d, length:%d, line:%d, start[@ %p]:\"",
+            token.type,
+            token.length,
+            token.line,
+            token.start
+        );
+
+        for (i = 0; i < token.length; i++) {
+            printf("%c", token.start[i]);
+        }
+
+        printf("\"}\n");
+    } while (token.type != TOK_ERROR && token.type != TOK_EOF);
+}
+
 int main(int argc, const char* argv[]) {
     CliConfig* cli;
 
@@ -127,6 +186,7 @@ int main(int argc, const char* argv[]) {
         exit(TULA_EXIT_NO_MEM);
     }
 
+    test("./tests/debug.tula");
 
     /* Determine what we are running based on cli args */
     if (cli->interactive == TRUE) {

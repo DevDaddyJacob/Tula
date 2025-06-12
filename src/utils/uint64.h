@@ -1,7 +1,7 @@
 #ifndef _STDINT
 
-#ifndef tulac_uint64_h
-#define tulac_uint64_h
+#ifndef tula_utils_uint64_h
+#define tula_utils_uint64_h
 
 
 typedef unsigned long UInt32;
@@ -79,5 +79,5 @@ char* uint64_toStringDec(UInt64 value);
 
 char* uint64_toStringBin(UInt64 value);
 
-#endif /* tulac_uint64_h */
+#endif /* tula_utils_uint64_h */
 #endif /* _STDINT */

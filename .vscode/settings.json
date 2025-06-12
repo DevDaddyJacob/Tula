@@ -20,6 +20,10 @@
         "cli.h": "c",
         "stdlib.h": "c",
         "conf.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "state.h": "c",
+        "lexer.h": "c",
+        "io.h": "c",
+        "initializer_list": "c"
     },
 }

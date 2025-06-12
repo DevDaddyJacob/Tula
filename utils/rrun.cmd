@@ -1,2 +1,2 @@
 @ECHO OFF
-.\bin\tula.exe
+.\bin\tulac.exe

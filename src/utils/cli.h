@@ -1,8 +1,8 @@
-#ifndef tula_cli_h
-#define tula_cli_h
+#ifndef tula_utils_cli_h
+#define tula_utils_cli_h
 
-#include "common.h"
-#include "tula.h"
+#include "../common.h"
+#include "../tula.h"
 
 extern const char* PROG_NAME;
 
@@ -18,4 +18,4 @@ typedef struct {
 CliConfig* tula_parseCliArgs(int argc, const char* argv[]);
 
 
-#endif /* tula_cli_h */
+#endif /* tula_utils_cli_h */

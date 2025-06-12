@@ -11,6 +11,40 @@
 
 /*
  * ============================================================================
+ * Define macros for API functions
+ * ============================================================================
+ */
+
+/**
+ * Marks a core API function
+ * (Equivilant of LUA_API)
+ */
+#define TULA_API extern
+
+/**
+ * Marks a auxiliary lib function
+ * (Equivilant of LUALIB_API)
+ */
+#define TULA_AUXLIB_API TULA_API
+
+/**
+ * Marks a standard lib function
+ * (Equivilant of LUAMOD_API)
+ */
+#define TULA_STDLIB_API TULA_API
+
+/**
+ * Marks a function that are not to be exported tooutside modules
+ * (Equivilant of LUAI_FUNC)
+ */
+#define TULA_FUNC extern
+
+
+/* ========================================================================= */
+
+
+/*
+ * ============================================================================
  * Define some shorthands to make interacting with numbers a bit better
  * ============================================================================
  */
@@ -19,6 +53,7 @@
 
 typedef signed char     Int8;
 typedef unsigned char   UInt8;
+typedef UInt8           byte;
 
 typedef signed int      Int16;
 typedef unsigned int    UInt16;
@@ -87,6 +122,16 @@ typedef unsigned long   UInt32;
 #if !defined(STR_EQ)
     #define STR_EQ(strA, strB) \
         (strcmp(strA, strB) == 0)
+#endif
+
+#if !defined(CHAR_IS_ALPHA)
+    #define CHAR_IS_ALPHA(c) \
+        ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+#endif
+
+#if !defined(CHAR_IS_DIGIT)
+    #define CHAR_IS_DIGIT(c) \
+        (c >= '0' && c <= '9')
 #endif
 
 /* ========================================================================= */

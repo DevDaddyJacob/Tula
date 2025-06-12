@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "cli.h"
-#include "common.h"
-#include "tula.h"
+#include "../common.h"
+#include "../tula.h"
 
 /*
  * ==================================================

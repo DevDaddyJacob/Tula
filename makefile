@@ -5,7 +5,7 @@ PLATFORM = guess
 C_STANDARD = 89
 
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic $(SYSCFLAGS)
+CFLAGS = -Wall -Wextra -pedantic -g $(SYSCFLAGS)
 
 UNAME = uname
 
