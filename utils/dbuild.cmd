@@ -1,2 +1,2 @@
 @ECHO OFF
-mingw32-make all TULA_MODE=DEBUG
+mingw32-make TULA_MODE=DEBUG

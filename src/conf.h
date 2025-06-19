@@ -24,20 +24,24 @@
 
 #if defined(TULA_OS_WINDOWS)
     #define _TULA_OS_DEF
+    #
 #endif
 
 
 #if defined(TULA_OS_MAC)
+    #define TULA_OS_POSIX_COMPLIANT
     #define _TULA_OS_DEF
 #endif
 
 
 #if defined(TULA_OS_LINUX)
+    #define TULA_OS_POSIX_COMPLIANT
     #define _TULA_OS_DEF
 #endif
 
 
 #if defined(TULA_OS_UNIX)
+    #define TULA_OS_POSIX_COMPLIANT
     #define _TULA_OS_DEF
 #endif
 
@@ -49,14 +53,17 @@
     
     #elif defined(__APPLE__) && defined(__MACH__)
         #define TULA_OS_MAC
+        #define TULA_OS_POSIX_COMPLIANT
         #define _TULA_OS_DEF
     
     #elif defined(__linux__)
         #define TULA_OS_LINUX
+        #define TULA_OS_POSIX_COMPLIANT
         #define _TULA_OS_DEF
 
     #elif defined(__unix__)
         #define TULA_OS_UNIX
+        #define TULA_OS_POSIX_COMPLIANT
         #define _TULA_OS_DEF
     
     #else

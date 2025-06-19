@@ -7,7 +7,15 @@
 extern const char* PROG_NAME;
 
 typedef struct {
-    BOOL interactive;           /** If the interactive option is selected */
+    /**
+     * If the interactive option is selected
+     */
+    Bool interactive;
+
+    /**
+     * The file to run
+     */
+    char* file;
 } CliConfig;
 
 

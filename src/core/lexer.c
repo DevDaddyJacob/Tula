@@ -49,7 +49,7 @@ static Token errorToken(Lexer* lexer, const char* message);
  * \return          Returns 1 if the current character is the expected one, 
  *                  and 0 otherwise
  */
-static BOOL readIf(Lexer* lexer, char expected);
+static Bool readIf(Lexer* lexer, char expected);
 
 
 /**
@@ -73,8 +73,8 @@ static void skipWhitespace(Lexer* lexer);
  */
 static TokenType checkKeyword(
     Lexer* lexer, 
-    int start, 
-    int length, 
+    Int16 start, 
+    Int16 length, 
     const char* rest, 
     TokenType type
 );
@@ -148,7 +148,7 @@ static Token errorToken(Lexer* lexer, const char* message) {
 }
 
 
-static BOOL readIf(Lexer* lexer, char expected) {
+static Bool readIf(Lexer* lexer, char expected) {
     if (!tulaIo_hasNext(lexer->reader)) return FALSE;
     if (tulaIo_peek(lexer->reader) != expected) return FALSE;
     tulaIo_comsume(lexer->reader);
@@ -194,8 +194,8 @@ static void skipWhitespace(Lexer* lexer) {
 
 static TokenType checkKeyword(
     Lexer* lexer, 
-    int start, 
-    int length, 
+    Int16 start, 
+    Int16 length, 
     const char* rest, 
     TokenType type
 ) {
@@ -276,7 +276,7 @@ static Token scanNumber(Lexer* lexer) {
     /* If we have a fractional part / have a decimal, consume it properly */
     if (
         tulaIo_peek(lexer->reader) == '.' 
-        && CHAR_IS_DIGIT(*tulaIo_peekN(lexer->reader, 1))
+        && CHAR_IS_DIGIT(tulaIo_peekN(lexer->reader, 1))
     ) {
         tulaIo_comsume(lexer->reader);
         while (CHAR_IS_DIGIT(tulaIo_peek(lexer->reader))) {
@@ -334,7 +334,7 @@ TULA_FUNC void tulaLex_destroy(Lexer* lexer) {
     if (lexer == NULL) return;
 
     /* Close the reader first */
-    tulaIo_closeBuffer(lexer->reader);
+    tulaIo_closeReader(lexer->reader);
 
 
     /* Release the whole lexer */

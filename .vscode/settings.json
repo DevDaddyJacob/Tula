@@ -24,6 +24,11 @@
         "state.h": "c",
         "lexer.h": "c",
         "io.h": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "parser.h": "c",
+        "memory.h": "c",
+        "types.h": "c",
+        "stat.h": "c",
+        "fio.h": "c"
     },
 }

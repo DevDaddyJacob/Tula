@@ -6,6 +6,7 @@
 #include "core/lexer.h"
 #include "utils/cli.h"
 #include "utils/io.h"
+#include "utils/fio.h"
 
 /*
  * ==================================================
@@ -115,7 +116,7 @@ static void repl_print(char* output) {
     fflush(stdout);
 }
 
-static void test(const char* path) {
+/*static void test(const char* path) {
     int i;
     FILE* file;
     size_t fileSize;
@@ -170,6 +171,25 @@ static void test(const char* path) {
 
         printf("\"}\n");
     } while (token.type != TOK_ERROR && token.type != TOK_EOF);
+} */
+
+static void test(const char* path) {
+    FileReader* reader = tulaFio_openReader(path);
+
+    printf("peek(): '%c'\n", tulaFio_peek(reader));
+    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
+    printf("peekN(1): '%c'\n", tulaFio_peekN(reader, 1));
+    printf("peekN(2): '%c'\n", tulaFio_peekN(reader, 2));
+    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
+    printf("peekN(4): '%c'\n", tulaFio_peekN(reader, 4));
+    printf("consume()\n"); tulaFio_consume(reader);
+    printf("consume()\n"); tulaFio_consume(reader);
+    printf("consume()\n"); tulaFio_consume(reader);
+    printf("peek(): '%c'\n", tulaFio_peek(reader));
+    printf("peekN(1): '%c'\n", tulaFio_peekN(reader, 1));
+    printf("peekN(2): '%c'\n", tulaFio_peekN(reader, 2));
+    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
+    printf("peekN(4): '%c'\n", tulaFio_peekN(reader, 4));
 }
 
 int main(int argc, const char* argv[]) {
@@ -186,6 +206,7 @@ int main(int argc, const char* argv[]) {
         exit(TULA_EXIT_NO_MEM);
     }
 
+    printf("CLI CONF(file): \"%s\"\n", cli->file);
     test("./tests/debug.tula");
 
     /* Determine what we are running based on cli args */

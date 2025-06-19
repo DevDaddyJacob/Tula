@@ -18,7 +18,8 @@ MKDIR = mkdir -p
 OUTPUT_NAME = tulac
 
 PLATFORMS = guess windows macosx linux
-CSTD = c$(C_STANDARD)
+
+CFLAGS += -std=c$(C_STANDARD)
 
 SOURCE_DIR = src
 BINARY_DIR = bin
@@ -59,6 +60,7 @@ clean:
 
 # Link the interpreter.
 $(OUTPUT_FILE): $(OBJECTS)
+	@ echo SYSCFLAGS = $(SYSCFLAGS)
 	@ echo "*" $(CC) -o $@ $(OBJECTS) $(CFLAGS)
 	@ $(MKDIR) "./$(BINARY_DIR)"
 	@ $(CC) -o $@ $(OBJECTS) $(CFLAGS)
@@ -77,15 +79,18 @@ guess:
 
 
 CYGWIN_NT-10.0-22631 windows:
-	@ echo "*" $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS SYSCFLAGS+=-DCSTD=89
-	@ $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS SYSCFLAGS+=-DCSTD=89
+	@ echo "> building for windows"
+	@ echo "*" $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS
+	@ $(MAKE) $(ALL) SYSCFLAGS=-DTULA_OS_WINDOWS
 
 
 Darwin macos macosx:
+	@ echo "> building for macos"
 	@ echo "*" $(MAKE) $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_MAC"
 	@ $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_MAC"
 
 
 Linux linux:
+	@ echo "> building for linux"
 	@ echo "*" $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_LINUX"
 	@ $(MAKE) $(ALL) SYSCFLAGS="-DTULA_OS_LINUX"

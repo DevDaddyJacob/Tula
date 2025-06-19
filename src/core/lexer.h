@@ -4,7 +4,7 @@
 #include "../common.h"
 #include "../utils/io.h"
 
-typedef enum {
+typedef enum tula_TokenType {
     /* Literals */
     TOK_EOF,
     TOK_ERROR,
@@ -56,11 +56,11 @@ typedef enum {
     TOK_GTR_EQU,        /** >= */
     TOK_LESS_EQU,       /** <= */
     TOK_BANG_EQU,       /** != */
-    TOK_EQU_EQU,        /** == */
+    TOK_EQU_EQU         /** == */
 } TokenType;
 
 
-typedef struct {
+typedef struct tula_Token {
     TokenType type;     /** The token's type */
     const char* start;  /** Pointer to the start of the token */
     Int16 length;       /** The length of the token */
@@ -68,7 +68,7 @@ typedef struct {
 } Token;
 
 
-typedef struct {
+typedef struct tula_Lexer {
     BufferReader* reader;       /** The buffer reader with the data to read */
     Int16 line;                 /** The line the current lexeme is on */
     const char* curLexStart;    /** Pointer to the start of the current lexeme */

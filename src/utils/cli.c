@@ -24,12 +24,15 @@ typedef enum {
     OPTION_END_OF_OPTIONS,  /** -- or --end-of-options */
     OPTION_HELP,            /** -h or --help */
     OPTION_VERSION,         /** -v or --version */
-    OPTION_INTERACTIVE      /** -i or --interactive */
+    OPTION_INTERACTIVE,     /** -i or --interactive */
+    OPTION_DUMP_DEBUG       /** --dump-debug */
 } OptionType;
 
 static void printHelpMenu();
 
-static BOOL hasNext(CliParams* params);
+static void dumpDebug();
+
+static Bool hasNext(CliParams* params);
 
 static const char* peekArgument(CliParams* params);
 
@@ -37,7 +40,7 @@ static const char* consumeArgument(CliParams* params);
 
 static OptionType parseOptionType(const char* arg);
 
-static BOOL consumeNext(CliParams* params, CliConfig* config);
+static Bool consumeNextOption(CliParams* params, CliConfig* config);
 
 
 /*
@@ -60,25 +63,87 @@ static void printHelpMenu() {
     /* Print the usage */
     fprintf(
         stdout,
-        "Usage: %s [OPTIONS] [FILE]\n\n" \
+        "Usage: %s [OPTIONS...] [FILE]\n\n" \
         "Options:\n" \
         "\t%-*s indicates the end of the options\n" \
         "\t%-*s prints this menu\n" \
         "\t%-*s prints the version of the program\n" \
-        "\t%-*s enters the REPL mode (Read-Evaluate-Print-Loop)\n",
+        "\t%-*s enters the REPL mode (Read-Evaluate-Print-Loop)\n" \
+        "\t%-*s dumps debug info\n",
 
         PROG_NAME,
         RIGHT_PAD_WIDTH, "--, --end-of-options",
         RIGHT_PAD_WIDTH, "-h, --help",
         RIGHT_PAD_WIDTH, "-v, --version",
-        RIGHT_PAD_WIDTH, "-i, --interactive"
+        RIGHT_PAD_WIDTH, "-i, --interactive",
+        RIGHT_PAD_WIDTH, "--dump-debug"
     );
 
 #undef RIGHT_PAD_WIDTH
     exit(TULA_EXIT_GODD);
 }
 
-static BOOL hasNext(CliParams* params) {
+
+static void dumpDebug() {
+    printf(
+        "Debug Info:\n" \
+        "\t TULA_DEBUGGING: %s\n" \
+        "\t TULA_OS_WINDOWS: %s\n" \
+        "\t TULA_OS_MAC: %s\n" \
+        "\t TULA_OS_LINUX: %s\n" \
+        "\t TULA_OS_UNIX: %s\n" \
+        "\t TULA_OS_POSIX_COMPLIANT: %s\n" \
+        "\nVersion: %s",
+
+#ifdef TULA_DEBUGGING
+            "Yes",
+#else
+            "No",
+#endif /* TULA_DEBUGGING */
+
+
+#ifdef TULA_OS_WINDOWS
+            "Yes",
+#else
+            "No",
+#endif /* TULA_OS_WINDOWS */
+
+
+#ifdef TULA_OS_MAC
+            "Yes",
+#else
+            "No",
+#endif /* TULA_OS_MAC */
+
+
+#ifdef TULA_OS_LINUX
+            "Yes",
+#else
+            "No",
+#endif /* TULA_OS_LINUX */
+
+
+#ifdef TULA_OS_UNIX
+            "Yes",
+#else
+            "No",
+#endif /* TULA_OS_UNIX */
+
+
+#ifdef TULA_OS_POSIX_COMPLIANT
+            "Yes",
+#else
+            "No",
+#endif /* TULA_OS_POSIX_COMPLIANT */
+
+        TULA_RELEASE
+    );
+
+    exit(TULA_EXIT_GODD);
+}
+
+
+static Bool hasNext(CliParams* params) {
     if (params->pointer >= params->argc) return FALSE;
     return TRUE;
 }
@@ -113,6 +178,8 @@ static OptionType parseOptionType(const char* arg) {
                         return OPTION_VERSION;
                     } else if (ARG_EQ("--interactive")) {
                         return OPTION_INTERACTIVE;
+                    } else if (ARG_EQ("--dump-debug")) {
+                        return OPTION_DUMP_DEBUG;
                     } else {
                         return OPTION_INVALID;
                     }
@@ -129,7 +196,7 @@ static OptionType parseOptionType(const char* arg) {
 }
 
 
-static BOOL consumeNext(CliParams* params, CliConfig* config) {
+static Bool consumeNextOption(CliParams* params, CliConfig* config) {
     if (!hasNext(params)) return FALSE;
 
     switch (parseOptionType(peekArgument(params))) {
@@ -148,6 +215,11 @@ static BOOL consumeNext(CliParams* params, CliConfig* config) {
             );
 
             exit(TULA_EXIT_BAD_USAGE);
+            return FALSE; /* Unreachable */
+        }
+
+        case OPTION_DUMP_DEBUG: {
+            dumpDebug();
             return FALSE; /* Unreachable */
         }
 
@@ -199,8 +271,29 @@ CliConfig* tula_parseCliArgs(int argc, const char** argv) {
     params->argv = argv;
 
 
-    /* Consume the arguments */
-    while (consumeNext(params, config));
+    /* Consume the options */
+    while (consumeNextOption(params, config));
 
+
+    /* If we still have next args, store it as the file */
+    if (hasNext(params)) {
+        UInt16 strLen = strlen(peekArgument(params)) + 1;
+
+        /* Allocate memory for the file */
+        config->file = (char*)malloc(sizeof(char) * strLen);
+        if (config->file == NULL) {
+            tula_errPrintFatal("Failed to allocate memory");
+            exit(TULA_EXIT_NO_MEM);
+        }
+
+        
+        /* Copy the memory of the argument to the config */
+        tula_safeStrCpy(config->file, consumeArgument(params), strLen);
+    } else {
+        config->file = NULL;
+    }
+
+
+    free(params);
     return config;
 }
