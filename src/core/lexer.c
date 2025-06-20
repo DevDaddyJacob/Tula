@@ -334,7 +334,7 @@ TULA_FUNC void tulaLex_destroy(Lexer* lexer) {
     if (lexer == NULL) return;
 
     /* Close the reader first */
-    tulaIo_closeReader(lexer->reader);
+    tulaIo_closeBuffer(lexer->reader);
 
 
     /* Release the whole lexer */

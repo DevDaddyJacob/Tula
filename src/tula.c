@@ -3,10 +3,11 @@
 
 #include "tula.h"
 #include "common.h"
-#include "core/lexer.h"
+#include "debug.h"
+#include "core/parser.h"
+#include "core/state.h"
 #include "utils/cli.h"
-#include "utils/io.h"
-#include "utils/fio.h"
+#include "utils/scriptFile.h"
 
 /*
  * ==================================================
@@ -33,6 +34,11 @@ static char* repl_eval(char* line);
 
 static void repl_print(char* output);
 
+static void setup();
+
+static void teardown(int exitCode, const char* exitMessage, Bool isFatal);
+
+
 
 /*
  * ==================================================
@@ -41,6 +47,7 @@ static void repl_print(char* output);
  */
 
 const char* PROG_NAME = TULA_PROGRAM_NAME;
+
 
 
 /*
@@ -75,6 +82,7 @@ static void repl_run() {
     }
 }
 
+
 static char* repl_read() {
     int readSuccessful, lineLength;
     char* buffer;
@@ -82,8 +90,8 @@ static char* repl_read() {
     /* Allocate the buffer */
     buffer = (char*)malloc(sizeof(char) * TULA_MAX_INPUT);
     if (buffer == NULL) {
-        tula_errPrintFatal("Failed to allocate memory");
-        exit(TULA_EXIT_NO_MEM);
+        tula_exitFatal(TULA_EXIT_NO_MEM, "Failed to allocate memory");
+        return NULL; /* Unreachable */
     }
 
 
@@ -106,9 +114,11 @@ static char* repl_read() {
     return buffer;
 }
 
+
 static char* repl_eval(char* line) {
     return line;
 }
+
 
 static void repl_print(char* output) {
     fputs(output, stdout);
@@ -116,103 +126,77 @@ static void repl_print(char* output) {
     fflush(stdout);
 }
 
-/*static void test(const char* path) {
-    int i;
-    FILE* file;
-    size_t fileSize;
-    char* buffer;
-    size_t bytesRead;
-    Lexer* lexer;
-    Token token;
 
-
-    file = fopen(path, "rb");
-    if (file == NULL) {
-        tula_errPrintFatal("Could not open file.");
-        exit(74);
-    }
-  
-    
-    fseek(file, 0L, SEEK_END);
-    fileSize = ftell(file);
-    rewind(file);
-  
-
-    buffer = (char*)malloc(fileSize + 1);
-    if (buffer == NULL) {
-        tula_errPrintFatal("Not enough memory to read");
-        exit(74);
-    }
-
-    bytesRead = fread(buffer, sizeof(char), fileSize, file);
-    if (bytesRead < fileSize) {
-        tula_errPrintFatal("Could not read file");
-        exit(74);
-    }
-
-    buffer[bytesRead] = '\0';
-  
-    fclose(file);
-
-    lexer = tulaLex_new(buffer);
-    do {
-        token = tulaLex_nextToken(lexer);
-        printf(
-            "Token{type:%d, length:%d, line:%d, start[@ %p]:\"",
-            token.type,
-            token.length,
-            token.line,
-            token.start
-        );
-
-        for (i = 0; i < token.length; i++) {
-            printf("%c", token.start[i]);
-        }
-
-        printf("\"}\n");
-    } while (token.type != TOK_ERROR && token.type != TOK_EOF);
-} */
-
-static void test(const char* path) {
-    FileReader* reader = tulaFio_openReader(path);
-
-    printf("peek(): '%c'\n", tulaFio_peek(reader));
-    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
-    printf("peekN(1): '%c'\n", tulaFio_peekN(reader, 1));
-    printf("peekN(2): '%c'\n", tulaFio_peekN(reader, 2));
-    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
-    printf("peekN(4): '%c'\n", tulaFio_peekN(reader, 4));
-    printf("consume()\n"); tulaFio_consume(reader);
-    printf("consume()\n"); tulaFio_consume(reader);
-    printf("consume()\n"); tulaFio_consume(reader);
-    printf("peek(): '%c'\n", tulaFio_peek(reader));
-    printf("peekN(1): '%c'\n", tulaFio_peekN(reader, 1));
-    printf("peekN(2): '%c'\n", tulaFio_peekN(reader, 2));
-    printf("peekN(3): '%c'\n", tulaFio_peekN(reader, 3));
-    printf("peekN(4): '%c'\n", tulaFio_peekN(reader, 4));
+static void setup(int argc, const char* argv[]) {
+    tulaState_setup(argc, argv);
 }
 
+
+static void teardown(int exitCode, const char* exitMessage, Bool isFatal) {
+    tulaState_teardown();
+
+    if (exitMessage != NULL) {
+        if (isFatal) tula_errPrintFatal(exitMessage);
+        else tula_errPrint(exitMessage);
+    }
+
+    exit(exitCode);
+}
+
+
+void tula_exit(int exitCode) {
+    teardown(exitCode, NULL, FALSE);
+}
+
+
+void tula_exitError(int exitCode, const char* errorMessage) {
+    teardown(exitCode, errorMessage, FALSE);
+}
+
+
+void tula_exitFatal(int exitCode, const char* errorMessage) {
+    teardown(exitCode, errorMessage, TRUE);
+}
+
+
 int main(int argc, const char* argv[]) {
-    CliConfig* cli;
+    GlobalState* gState = NULL;
 
-    /* Initialize variables */
-    cli = NULL;
+    /* Run setup operations */
+    setup(argc, argv);
+    gState = tulaState_getGlobal();
 
-
-    /* Parse the command line arguments */
-    cli = tula_parseCliArgs(argc, argv);
-    if (cli == NULL) {
-        tula_errPrintFatal("Failed to allocate memory");
-        exit(TULA_EXIT_NO_MEM);
-    }
-
-    printf("CLI CONF(file): \"%s\"\n", cli->file);
-    test("./tests/debug.tula");
-
+    
     /* Determine what we are running based on cli args */
-    if (cli->interactive == TRUE) {
+    if (gState->cli->interactive == TRUE) {
         repl_run();
+        tula_exit(TULA_EXIT_GODD);
+
+        return -1; /* Unreachable */
     }
 
-    return TULA_EXIT_GODD;
+
+    /* Run the file */
+    if (gState->cli->file != NULL) {
+        Bool parsed;
+        
+        /* Create the script file */
+        gState->script = tulaSrc_new(gState->cli->file);
+        if (gState->script == NULL) {
+            tula_exitFatal(TULA_EXIT_NO_MEM, "Failed to allocate memory");
+            return -1; /* Unreachable */
+        }
+
+
+        /* Parse the script file */
+        gState->scriptChunk = tulaChk_new();
+        parsed = tula_parseSource(gState->script->content, gState->scriptChunk);
+        
+        printf("Parsed: %d\n", parsed);
+        debug_disassembleChunk(gState->scriptChunk, "code");
+    }
+
+
+    tula_exit(TULA_EXIT_GODD);
+    return -1; /* Unreachable */
 }

@@ -80,7 +80,7 @@ static void printHelpMenu() {
     );
 
 #undef RIGHT_PAD_WIDTH
-    exit(TULA_EXIT_GODD);
+    tula_exit(TULA_EXIT_GODD);
 }
 
 
@@ -93,7 +93,7 @@ static void dumpDebug() {
         "\t TULA_OS_LINUX: %s\n" \
         "\t TULA_OS_UNIX: %s\n" \
         "\t TULA_OS_POSIX_COMPLIANT: %s\n" \
-        "\nVersion: %s",
+        "\nVersion: %s\n",
 
 #ifdef TULA_DEBUGGING
             "Yes",
@@ -139,7 +139,7 @@ static void dumpDebug() {
         TULA_RELEASE
     );
 
-    exit(TULA_EXIT_GODD);
+    tula_exit(TULA_EXIT_GODD);
 }
 
 
@@ -197,42 +197,55 @@ static OptionType parseOptionType(const char* arg) {
 
 
 static Bool consumeNextOption(CliParams* params, CliConfig* config) {
+    OptionType optionType;
+
     if (!hasNext(params)) return FALSE;
 
-    switch (parseOptionType(peekArgument(params))) {
+    switch ((optionType = parseOptionType(peekArgument(params)))) {
+        case OPTION_INVALID:
+        case OPTION_HELP:
+        case OPTION_DUMP_DEBUG:
+        case OPTION_VERSION: {
+            free(params);
+            free(config);
+            
+            switch (optionType) {
+                case OPTION_INVALID: {
+                    tula_exitError(
+                        TULA_EXIT_BAD_USAGE,
+                        "invalid option: use 'tula --help' for more information"
+                    );
+                    break;
+                }
+
+                case OPTION_HELP: {
+                    printHelpMenu();
+                    break;
+                }
+
+                case OPTION_DUMP_DEBUG: {
+                    dumpDebug();
+                    break;
+                }
+
+                case OPTION_VERSION: {
+                    printf(TULA_RELEASE "\n");
+                    tula_exit(TULA_EXIT_GODD);
+                    break;
+                }
+
+                default: break; /* Unreachable */
+            }
+            
+            return FALSE; /* Unreachable */
+        }
+
         case OPTION_UNKNOWN: {
             return FALSE;
         }
 
         case OPTION_END_OF_OPTIONS: {
             consumeArgument(params);
-            return FALSE;
-        }
-
-        case OPTION_INVALID: {
-            tula_errPrint(
-                "invalid option: use 'tula --help' for more information"
-            );
-
-            exit(TULA_EXIT_BAD_USAGE);
-            return FALSE; /* Unreachable */
-        }
-
-        case OPTION_DUMP_DEBUG: {
-            dumpDebug();
-            return FALSE; /* Unreachable */
-        }
-
-        case OPTION_HELP: {
-            consumeArgument(params);
-            printHelpMenu();
-            return FALSE;
-        }
-
-        case OPTION_VERSION: {
-            consumeArgument(params);
-            printf(TULA_RELEASE);
-
             return FALSE;
         }
 
@@ -247,21 +260,23 @@ static Bool consumeNextOption(CliParams* params, CliConfig* config) {
 }
 
 
-CliConfig* tula_parseCliArgs(int argc, const char** argv) {
+TULA_FUNC CliConfig* tulaCli_parseArgs(int argc, const char** argv) {
     CliConfig* config;
     CliParams* params;
     
     /* Allocate memory for params & config */
     params = (CliParams*)malloc(sizeof(CliParams));
     if (params == NULL) {
-        tula_errPrintFatal("Failed to allocate memory");
-        exit(TULA_EXIT_NO_MEM);
+        tula_exitFatal(TULA_EXIT_NO_MEM, "Failed to allocate memory");
+        return NULL; /* Unreachable */
     }
 
     config = (CliConfig*)malloc(sizeof(CliConfig));
     if (config == NULL) {
-        tula_errPrintFatal("Failed to allocate memory");
-        exit(TULA_EXIT_NO_MEM);
+        free(params);
+
+        tula_exitFatal(TULA_EXIT_NO_MEM, "Failed to allocate memory");
+        return NULL; /* Unreachable */
     }
 
     
@@ -282,8 +297,9 @@ CliConfig* tula_parseCliArgs(int argc, const char** argv) {
         /* Allocate memory for the file */
         config->file = (char*)malloc(sizeof(char) * strLen);
         if (config->file == NULL) {
-            tula_errPrintFatal("Failed to allocate memory");
-            exit(TULA_EXIT_NO_MEM);
+            free(params);
+            tula_exitFatal(TULA_EXIT_NO_MEM, "Failed to allocate memory");
+            return NULL; /* Unreachable */
         }
 
         

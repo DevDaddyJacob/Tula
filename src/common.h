@@ -87,6 +87,7 @@ typedef UInt8 Bool;
 #define TULA_EXIT_BAD_USAGE 1
 #define TULA_EXIT_NO_MEM 2
 #define TULA_EXIT_BUFF_OVERFLOW 3
+#define TULA_EXIT_ACCESS_STATE_BEFOR_INIT 4
 
 
 /* ========================================================================= */

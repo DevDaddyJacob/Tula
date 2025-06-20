@@ -23,7 +23,7 @@ typedef struct {
  * \brief               Takes the command line arguments and parses them into
  *                      a CliConfig struct
  */
-CliConfig* tula_parseCliArgs(int argc, const char* argv[]);
+TULA_FUNC CliConfig* tulaCli_parseArgs(int argc, const char* argv[]);
 
 
 #endif /* tula_utils_cli_h */

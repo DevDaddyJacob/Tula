@@ -71,7 +71,25 @@ typedef enum tula_OpCode {
      * 1 byte long
      * - byte 1: Opcode
      */
-    OP_NOT
+    OP_NOT,
+    
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
+    OP_EQUAL,
+    
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
+    OP_GREATER,
+    
+    /**
+     * 1 byte long
+     * - byte 1: Opcode
+     */
+    OP_LESS
 } OpCode;
 
 

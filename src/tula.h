@@ -12,4 +12,9 @@
 #define TULA_RELEASE TULA_VERSION "." TULA_VERSION_RELEASE
 
 
+void tula_exit(int exitCode);
+void tula_exitError(int exitCode, const char* errorMessage);
+void tula_exitFatal(int exitCode, const char* errorMessage);
+
+
 #endif /* tula_h */

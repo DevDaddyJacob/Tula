@@ -73,7 +73,7 @@ const char* TokenTypes[] = {
     "TOK_GTR_EQU",
     "TOK_LESS_EQU",
     "TOK_BANG_EQU",
-    "TOK_EQU_EQU",
+    "TOK_EQU_EQU"
 };
 
 const char* OpCodes[] = {
@@ -88,6 +88,9 @@ const char* OpCodes[] = {
     "OP_TRUE",
     "OP_FALSE",
     "OP_NOT",
+    "OP_EQUAL",
+    "OP_GREATER",
+    "OP_LESS"
 };
 
 const char* InterpretResults[] = {
@@ -148,6 +151,9 @@ int debug_disassembleInstruction(Chunk* chunk, int offset) {
         case OP_TRUE:
         case OP_FALSE:
         case OP_NOT:
+        case OP_EQUAL:
+        case OP_GREATER:
+        case OP_LESS:
             return simpleInstruction(OpCodes[instruction], offset);
             
         case OP_CONSTANT:

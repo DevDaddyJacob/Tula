@@ -269,22 +269,22 @@ static ParseRule PARSE_RULES[] = {
     { NULL,             NULL,           PREC_NONE },            /* TOK_COMMA */
     { NULL,             NULL,           PREC_NONE },            /* TOK_DOT */
     { NULL,             NULL,           PREC_NONE },            /* TOK_SEMICOLON */
-    { parseGrouping,    parseBinary,    PREC_ADDATIVE },        /* TOK_MINUS */
+    { parseUnary,       parseBinary,    PREC_ADDATIVE },        /* TOK_MINUS */
     { NULL,             parseBinary,    PREC_ADDATIVE },        /* TOK_PLUS */
     { NULL,             parseBinary,    PREC_MULTIPLICATIVE },  /* TOK_SLASH */
     { NULL,             parseBinary,    PREC_MULTIPLICATIVE },  /* TOK_STAR */
     { NULL,             NULL,           PREC_NONE },            /* TOK_EXPO */
     { NULL,             NULL,           PREC_NONE },            /* TOK_PERCENT */
     { NULL,             NULL,           PREC_NONE },            /* TOK_EQUAL */
-    { NULL,             NULL,           PREC_NONE },            /* TOK_GREATER */
-    { NULL,             NULL,           PREC_NONE },            /* TOK_LESS */
+    { NULL,             parseBinary,    PREC_COMPARATIVE },     /* TOK_GREATER */
+    { NULL,             parseBinary,    PREC_COMPARATIVE },     /* TOK_LESS */
     
 
     /* Multi Char Tokens */
-    { NULL,             NULL,           PREC_NONE },        /* TOK_GTR_EQU */
-    { NULL,             NULL,           PREC_NONE },        /* TOK_LESS_EQU */
-    { NULL,             NULL,           PREC_NONE },        /* TOK_BANG_EQU */
-    { NULL,             NULL,           PREC_NONE }         /* TOK_EQU_EQU */
+    { NULL,             parseBinary,    PREC_COMPARATIVE },        /* TOK_GTR_EQU */
+    { NULL,             parseBinary,    PREC_COMPARATIVE },        /* TOK_LESS_EQU */
+    { NULL,             parseBinary,    PREC_EQUALITY },           /* TOK_BANG_EQU */
+    { NULL,             parseBinary,    PREC_EQUALITY }            /* TOK_EQU_EQU */
 };
 
 
@@ -468,6 +468,12 @@ static void parseBinary() {
         case TOK_MINUS: emitByte(OP_SUBTRACT); break;
         case TOK_STAR: emitByte(OP_MULTIPLY); break;
         case TOK_SLASH: emitByte(OP_DIVIDE); break;
+        case TOK_GREATER: emitByte(OP_GREATER); break;
+        case TOK_LESS: emitByte(OP_LESS); break;
+        case TOK_GTR_EQU: emitBytes(OP_LESS, OP_NOT); break;
+        case TOK_LESS_EQU: emitBytes(OP_GREATER, OP_NOT); break;
+        case TOK_BANG_EQU: emitBytes(OP_EQUAL, OP_NOT); break;
+        case TOK_EQU_EQU: emitByte(OP_EQUAL); break;
         default: return; /* Unreachable */
     }
 }

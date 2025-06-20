@@ -1,0 +1,4 @@
+tula_import ./import1.tula
+tula_import ./import2.tula
+
+var test = 10;
