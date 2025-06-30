@@ -286,6 +286,11 @@ TULA_FUNC CliConfig* tulaCli_parseArgs(int argc, const char** argv) {
     params->argv = argv;
 
 
+    /* Default the config */
+    config->interactive = FALSE;
+    config->file = NULL;
+
+
     /* Consume the options */
     while (consumeNextOption(params, config));
 
@@ -312,4 +317,16 @@ TULA_FUNC CliConfig* tulaCli_parseArgs(int argc, const char** argv) {
 
     free(params);
     return config;
+}
+
+
+TULA_FUNC void tulaCli_destroy(CliConfig* config) {
+    if (config == NULL) return;
+
+    if (config->file != NULL) {
+        free(config->file);
+        config->file = NULL;
+    }
+
+    free(config);
 }

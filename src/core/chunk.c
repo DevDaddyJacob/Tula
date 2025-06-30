@@ -54,6 +54,10 @@ TULA_FUNC Chunk* tulaChk_new() {
     chunk->code = NULL;
     chunk->lines = NULL;
 
+
+    /* Initialize the constant array */
+    tula_initValueArray(&chunk->constants);
+
     return chunk;
 }
 

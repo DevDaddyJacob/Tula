@@ -29,6 +29,8 @@
         "memory.h": "c",
         "types.h": "c",
         "stat.h": "c",
-        "fio.h": "c"
+        "fio.h": "c",
+        "scriptfile.h": "c",
+        "errors.h": "c"
     },
 }

@@ -61,16 +61,17 @@ typedef enum tula_TokenType {
 
 
 typedef struct tula_Token {
-    TokenType type;     /** The token's type */
-    const char* start;  /** Pointer to the start of the token */
-    Int16 length;       /** The length of the token */
-    Int16 line;         /** The line the token is found on */
+    TokenType type;         /** The token's type */
+    Int16 line;             /** The line the token is found on */
+    const char* start;      /** Pointer to the start of the token */
+    Int16 length;           /** The length of the token */
 } Token;
 
 
 typedef struct tula_Lexer {
     BufferReader* reader;       /** The buffer reader with the data to read */
     Int16 line;                 /** The line the current lexeme is on */
+    const char* curLineStart;   /** Pointer to the start of the current line */
     const char* curLexStart;    /** Pointer to the start of the current lexeme */
 } Lexer;
 

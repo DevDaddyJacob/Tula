@@ -131,9 +131,9 @@ static Token scanString(Lexer* lexer);
 static Token makeToken(Lexer* lexer, TokenType type) {
     Token token;
     token.type = type;
+    token.line = lexer->line;
     token.start = lexer->curLexStart;
     token.length = (Int16)(lexer->reader->next - lexer->curLexStart);
-    token.line = lexer->line;
     return token;
 }
 
@@ -141,9 +141,9 @@ static Token makeToken(Lexer* lexer, TokenType type) {
 static Token errorToken(Lexer* lexer, const char* message) {
     Token token;
     token.type = TOK_ERROR;
+    token.line = lexer->line;
     token.start = message;
     token.length = (Int16)strlen(message);
-    token.line = lexer->line;
     return token;
 }
 
@@ -169,6 +169,7 @@ static void skipWhitespace(Lexer* lexer) {
             case '\n': {
                 lexer->line++;
                 tulaIo_comsume(lexer->reader);
+                lexer->curLineStart = lexer->reader->next;
                 break;
             }
 
@@ -291,7 +292,10 @@ static Token scanNumber(Lexer* lexer) {
 static Token scanString(Lexer* lexer) {
     /* Keep scanning until we hit a string terminator, or the end of file */
     while (tulaIo_peek(lexer->reader) != '"' && tulaIo_hasNext(lexer->reader)) {
-        if (tulaIo_peek(lexer->reader) == '\n') lexer->line++;
+        if (tulaIo_peek(lexer->reader) == '\n') {
+            lexer->line++;
+            lexer->curLineStart = lexer->reader->next + 1;
+        }
 
         tulaIo_comsume(lexer->reader);
     }
@@ -324,6 +328,7 @@ TULA_FUNC Lexer* tulaLex_new(const char* source) {
 
     /* Prime the other variables */
     lexer->curLexStart = lexer->reader->start;
+    lexer->curLineStart = lexer->reader->start;
     lexer->line = 1;
 
     return lexer;

@@ -26,4 +26,7 @@ typedef struct {
 TULA_FUNC CliConfig* tulaCli_parseArgs(int argc, const char* argv[]);
 
 
+TULA_FUNC void tulaCli_destroy(CliConfig* config);
+
+
 #endif /* tula_utils_cli_h */

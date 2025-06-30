@@ -71,7 +71,7 @@ TULA_FUNC void tulaState_teardown() {
 
     /* Destroy the cli config */
     if (GLOBAL_STATE->cli != NULL) {
-        free(GLOBAL_STATE->cli);
+        tulaCli_destroy(GLOBAL_STATE->cli);
         GLOBAL_STATE->cli = NULL;
     }
     

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "parser.h"
+#include "errors.h"
 #include "lexer.h"
 #include "../common.h"
 #include "../debug.h"
@@ -339,6 +340,15 @@ static void endParser() {
 static void errorAt(Token* token, const char* message) {
     if (parser.panicMode) return;
     parser.panicMode = TRUE;
+
+    /*tulaErr_parseError(
+        token,
+        message,
+        NULL,
+        NULL,
+        "Unknown",
+        parser.lexer->curLineStart
+    );*/
 
     fprintf(
         stderr,
